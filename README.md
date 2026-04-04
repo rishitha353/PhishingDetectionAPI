@@ -1,7 +1,7 @@
 ````markdown id="finalreadme01"
 # 🛡️ Real-Time Phishing Detection System
 
-A microservice-based system that detects phishing URLs in real-time using **Spring Boot APIs** and **Python ML/DL models**.
+A microservice-based system that detects phishing URLs in real-time using Spring Boot APIs and Python ML/DL models.
 
 ---
 
@@ -22,11 +22,11 @@ Client → Spring Boot (REST API) → FastAPI (ML Models) → MySQL
 ---
 
 ## 🛠️ Tech Stack
-- **Backend:** Java, Spring Boot  
-- **ML Service:** Python, FastAPI  
-- **Models:** Scikit-learn, TensorFlow  
-- **Database:** MySQL  
-- **Tools:** Docker, Postman  
+- Backend: Java, Spring Boot  
+- ML Service: Python, FastAPI  
+- Models: Scikit-learn, TensorFlow  
+- Database: MySQL  
+- Tools: Docker, Postman   
 
 ---
 
