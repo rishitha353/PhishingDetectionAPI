@@ -3,14 +3,14 @@ services:
     image: mysql:8.0
     container_name: phishing-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: Rishitha@89
+      MYSQL_ROOT_PASSWORD: your_password_here
       MYSQL_DATABASE: phishing_db
     ports:
       - "3307:3306"
     networks:
       - phishing-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pRishitha@89"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pyour_password_here"]
       interval: 10s
       timeout: 10s
       retries: 20
@@ -36,11 +36,10 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql-db:3306/phishing_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
       SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: Rishitha@89
+      SPRING_DATASOURCE_PASSWORD: your_password_here
       PYTHON_API_URL: http://python-api:5002
     networks:
       - phishing-network
-    restart: on-failure
 
 networks:
   phishing-network:
