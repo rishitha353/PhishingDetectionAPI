@@ -4,6 +4,8 @@ import joblib
 import uvicorn
 import numpy as np
 import tensorflow as tf
+import re
+import socket
 from typing import Dict, Any
 
 app = FastAPI()
@@ -15,6 +17,35 @@ xgb_model = joblib.load("models/xgb_model.pkl")
 cnn_model = tf.keras.models.load_model("models/cnn_model.h5")
 
 print("✅ All models loaded successfully")
+
+# ---------- URL validation functions ----------
+def is_valid_url_format(url: str) -> bool:
+    """Check if URL has valid format"""
+    # Reject URLs with commas, spaces, or invalid characters
+    if ',' in url or ' ' in url:
+        return False
+    
+    # Basic URL pattern
+    url_pattern = re.compile(
+        r'^(https?:\/\/)?'  # http:// or https:// (optional)
+        r'([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+'  # domain name
+        r'[a-zA-Z]{2,}'  # TLD (com, org, net, etc.)
+        r'(:\d+)?'  # port (optional)
+        r'(\/.*)?$'  # path (optional)
+    )
+    return url_pattern.match(url) is not None
+
+def domain_exists(url: str) -> bool:
+    """Check if the domain actually exists via DNS lookup"""
+    try:
+        # Extract domain from URL
+        domain = url.replace('http://', '').replace('https://', '').split('/')[0].split(':')[0]
+        socket.gethostbyname(domain)
+        return True
+    except socket.gaierror:
+        return False
+    except Exception:
+        return False
 
 # ---------- feature extraction (30 features) ----------
 def extract_features_from_url(url: str):
@@ -112,8 +143,8 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
                 "model_used": "invalid"
             }
         
-        # Check if it looks like a URL (has a dot or http)
-        if '.' not in url and not url.startswith(('http://', 'https://')):
+        # Check URL format
+        if not is_valid_url_format(url):
             return {
                 "is_phishing": False,
                 "confidence": 0.0,
@@ -123,6 +154,14 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
         # Add http:// if missing
         if not url.startswith(('http://', 'https://')):
             url = 'http://' + url
+        
+        # Check if domain exists (DNS lookup)
+        if not domain_exists(url):
+            return {
+                "is_phishing": False,
+                "confidence": 0.0,
+                "model_used": "invalid"
+            }
         
         # ---------- FEATURE EXTRACTION ----------
         X_structured = extract_features_from_url(url)
@@ -153,7 +192,7 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
             proba = (p_rf + p_svm + p_xgb + p_cnn) / 4.0
             used = "ensemble"
         
-                # ---------- RETURN RESULT ----------
+        # ---------- RETURN RESULT ----------
         # Using 0.25 threshold (25% confidence needed for phishing)
         is_phishing = proba >= 0.25
         
