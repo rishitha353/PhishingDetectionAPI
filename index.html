@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Phishing Detection API - Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            display: none;
+        }
+        .result pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+        .loading {
+            color: #007bff;
+            display: none;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+        h1 {
+            color: #333;
+        }
+        hr {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ Phishing Detection API</h1>
+        <p>Enter a URL to check if it's a phishing website</p>
+        
+        <hr>
+        
+        <h3>Java API (Main)</h3>
+        <label>URL to check:</label>
+        <input type="text" id="url" placeholder="http://example.com" value="http://google.com">
+        
+        <label>Model Type:</label>
+        <select id="modelType">
+            <option value="rf">Random Forest (Recommended)</option>
+            <option value="svm">SVM</option>
+            <option value="xgb">XGBoost</option>
+            <option value="cnn">CNN</option>
+            <option value="ensemble">Ensemble (All Models)</option>
+        </select>
+        
+        <button onclick="testJavaAPI()">Test Java API</button>
+        
+        <hr>
+        
+        <h3>Python API (Direct ML)</h3>
+        <button onclick="testPythonAPI()">Test Python API Directly</button>
+        
+        <div class="loading" id="loading">
+            ⏳ Processing... Please wait 30-60 seconds if the service is waking up...
+        </div>
+        
+        <div class="result" id="result">
+            <h4>Response:</h4>
+            <pre id="responseText"></pre>
+        </div>
+    </div>
+
+    <script>
+        const JAVA_API_URL = 'https://phishing-java-api.onrender.com/api/phishing/predict';
+        const PYTHON_API_URL = 'https://phishing-python-api.onrender.com/predict';
+        
+        async function testJavaAPI() {
+            const url = document.getElementById('url').value;
+            const modelType = document.getElementById('modelType').value;
+            const loading = document.getElementById('loading');
+            const resultDiv = document.getElementById('result');
+            const responseText = document.getElementById('responseText');
+            
+            loading.style.display = 'block';
+            resultDiv.style.display = 'none';
+            responseText.innerHTML = '';
+            
+            try {
+                const response = await fetch(JAVA_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        url: url,
+                        modelType: modelType
+                    })
+                });
+                
+                const data = await response.json();
+                
+                loading.style.display = 'none';
+                resultDiv.style.display = 'block';
+                
+                if (response.ok) {
+                    const isPhishing = data.is_phishing ? '⚠️ PHISHING DETECTED' : '✅ SAFE';
+                    responseText.innerHTML = `Status: ${isPhishing}\nConfidence: ${(data.confidence * 100).toFixed(1)}%\nModel Used: ${data.model_used}\n\nFull Response:\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    responseText.innerHTML = `Error: ${JSON.stringify(data)}`;
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                resultDiv.style.display = 'block';
+                responseText.innerHTML = `Error: ${error.message}. The service might be waking up. Please try again in 30 seconds.`;
+            }
+        }
+        
+        async function testPythonAPI() {
+            const url = document.getElementById('url').value;
+            const loading = document.getElementById('loading');
+            const resultDiv = document.getElementById('result');
+            const responseText = document.getElementById('responseText');
+            
+            loading.style.display = 'block';
+            resultDiv.style.display = 'none';
+            responseText.innerHTML = '';
+            
+            try {
+                const response = await fetch(PYTHON_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        url: url,
+                        model_type: 'rf'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                loading.style.display = 'none';
+                resultDiv.style.display = 'block';
+                
+                if (response.ok) {
+                    const isPhishing = data.is_phishing ? '⚠️ PHISHING DETECTED' : '✅ SAFE';
+                    responseText.innerHTML = `Status: ${isPhishing}\nConfidence: ${(data.confidence * 100).toFixed(1)}%\nModel Used: ${data.model_used}\n\nFull Response:\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    responseText.innerHTML = `Error: ${JSON.stringify(data)}`;
+                }
+            } catch (error) {
+                loading.style.display = 'none';
+                resultDiv.style.display = 'block';
+                responseText.innerHTML = `Error: ${error.message}. The service might be waking up. Please try again in 30 seconds.`;
+            }
+        }
+    </script>
+</body>
+</html>
