@@ -1,24 +1,26 @@
 # ---- Build Stage ----
+# Use an official Maven image to build the application
 FROM maven:3.9.9-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Copy pom.xml and download dependencies
+# Copy the Maven project file and download dependencies
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 
-# Copy source code and build the JAR
+# Copy the source code and build the executable JAR file
 COPY src src
 RUN mvn clean package -DskipTests
 
 # ---- Run Stage ----
+# Use a slim Java runtime image to run the application
 FROM eclipse-temurin:17-jdk-alpine
 WORKDIR /app
 
-# Copy the built JAR from the build stage
+# Copy the built JAR file from the previous stage
 COPY --from=build /app/target/*.jar app.jar
 
-# Download the PostgreSQL JDBC driver JAR directly
-ADD https://jdbc.postgresql.org/download/postgresql-42.7.4.jar /app/postgresql.jar
+# Expose the port your application runs on
+EXPOSE 8080
 
-# Run the application with both JARs in the classpath
-ENTRYPOINT ["java", "-cp", "app.jar:postgresql.jar", "org.springframework.boot.loader.JarLauncher"]
+# Run the JAR file. The 'exec' form is used for proper signal handling.
+ENTRYPOINT ["java", "-jar", "app.jar"]
