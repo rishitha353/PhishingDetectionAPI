@@ -104,7 +104,6 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
         model_name = req.model_type.lower()
         
         # ---------- URL VALIDATION ----------
-        # Check if URL is empty
         if not url or len(url) == 0:
             return {
                 "is_phishing": False,
@@ -112,7 +111,6 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
                 "model_used": "invalid"
             }
         
-        # Check if it looks like a URL (has a dot or http)
         if '.' not in url and not url.startswith(('http://', 'https://')):
             return {
                 "is_phishing": False,
@@ -120,14 +118,11 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
                 "model_used": "invalid"
             }
         
-        # Add http:// if missing
         if not url.startswith(('http://', 'https://')):
             url = 'http://' + url
         
         # ---------- FEATURE EXTRACTION ----------
         X_structured = extract_features_from_url(url)
-        
-        # CNN input
         X_cnn = X_structured.reshape(1, 5, 6, 1)
         
         # ---------- PREDICTION ----------
@@ -144,19 +139,20 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
             used = "cnn"
             
         elif model_name == "ensemble":
-            # OPTIMIZED ENSEMBLE: Use only accurate models (XGBoost and CNN)
-            # RF and SVM removed because they give false positives on safe URLs
+            # Use all 4 models for ensemble
+            p_rf = float(rf_model.predict_proba(X_structured)[0][1])
+            p_svm = float(svm_model.predict_proba(X_structured)[0][1])
             p_xgb = float(xgb_model.predict_proba(X_structured)[0][1])
             p_cnn = float(cnn_model.predict(X_cnn, verbose=0)[0][0])
-            proba = (p_xgb + p_cnn) / 2.0
-            used = "ensemble_optimized"
+            proba = (p_rf + p_svm + p_xgb + p_cnn) / 4.0
+            used = "ensemble"
             
         else:  # default to Random Forest
             proba = float(rf_model.predict_proba(X_structured)[0][1])
             used = "rf"
         
         # ---------- RETURN RESULT ----------
-        # Using 0.5 threshold for better accuracy (reduces false positives)
+        # Using 0.5 threshold (50% confidence needed for phishing)
         return {
             "is_phishing": proba >= 0.5,
             "confidence": round(proba, 4),
