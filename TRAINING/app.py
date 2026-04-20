@@ -7,6 +7,7 @@ import tensorflow as tf
 import re
 import socket
 from typing import Dict, Any
+from urllib.parse import urlparse
 
 app = FastAPI()
 
@@ -18,7 +19,43 @@ cnn_model = tf.keras.models.load_model("models/cnn_model.h5")
 
 print("✅ All models loaded successfully")
 
+# ---------- TRUSTED DOMAINS (Always SAFE) ----------
+TRUSTED_DOMAINS = [
+    'onrender.com',
+    'render.com',
+    'google.com',
+    'github.com',
+    'stackoverflow.com',
+    'localhost',
+    '127.0.0.1',
+    'microsoft.com',
+    'apple.com',
+    'amazon.com',
+    'facebook.com',
+    'twitter.com',
+    'linkedin.com'
+]
+
 # ---------- URL validation functions ----------
+def is_trusted_domain(url: str) -> bool:
+    """Check if the URL belongs to a trusted domain"""
+    try:
+        # Extract domain from URL
+        parsed = urlparse(url)
+        domain = parsed.netloc.lower()
+        
+        # Remove www. prefix if present
+        if domain.startswith('www.'):
+            domain = domain[4:]
+        
+        # Check if domain is in trusted list or ends with trusted domain
+        for trusted in TRUSTED_DOMAINS:
+            if domain == trusted or domain.endswith('.' + trusted):
+                return True
+        return False
+    except Exception:
+        return False
+
 def is_valid_url_format(url: str) -> bool:
     """Check if URL has valid format"""
     # Reject URLs with commas, spaces, or invalid characters
@@ -154,6 +191,14 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
         # Add http:// if missing
         if not url.startswith(('http://', 'https://')):
             url = 'http://' + url
+        
+        # ---------- TRUSTED DOMAIN CHECK (Always SAFE) ----------
+        if is_trusted_domain(url):
+            return {
+                "is_phishing": False,
+                "confidence": 0.0,
+                "model_used": "trusted_safe"
+            }
         
         # Check if domain exists (DNS lookup)
         if not domain_exists(url):
