@@ -156,9 +156,9 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
             used = "rf"
         
         # ---------- RETURN RESULT ----------
-        # Using 0.4 threshold for phishing detection (more sensitive)
+        # Using 0.25 threshold for phishing detection (more sensitive)
         return {
-            "is_phishing": proba >= 0.4,
+            "is_phishing": proba >= 0.25,
             "confidence": round(proba, 4),
             "model_used": used
         }
