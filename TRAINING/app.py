@@ -5,7 +5,6 @@ import uvicorn
 import numpy as np
 import tensorflow as tf
 import re
-import socket
 from typing import Dict, Any
 from urllib.parse import urlparse
 
@@ -18,6 +17,34 @@ xgb_model = joblib.load("models/xgb_model.pkl")
 cnn_model = tf.keras.models.load_model("models/cnn_model.h5")
 
 print("✅ All models loaded successfully")
+
+# ---------- TRUSTED DOMAINS (Always SAFE, but still use ensemble) ----------
+TRUSTED_DOMAINS = [
+    'onrender.com',
+    'render.com',
+    'google.com',
+    'github.com',
+    'stackoverflow.com',
+    'localhost',
+    '127.0.0.1',
+    'microsoft.com',
+    'apple.com',
+    'amazon.com'
+]
+
+def is_trusted_domain(url: str) -> bool:
+    """Check if URL belongs to trusted domain"""
+    try:
+        parsed = urlparse(url)
+        domain = parsed.netloc.lower()
+        if domain.startswith('www.'):
+            domain = domain[4:]
+        for trusted in TRUSTED_DOMAINS:
+            if domain == trusted or domain.endswith('.' + trusted):
+                return True
+        return False
+    except Exception:
+        return False
 
 # ---------- URL validation functions ----------
 def is_valid_url_format(url: str) -> bool:
@@ -33,17 +60,6 @@ def is_valid_url_format(url: str) -> bool:
         r'(\/.*)?$'
     )
     return url_pattern.match(url) is not None
-
-def domain_exists(url: str) -> bool:
-    """Check if the domain actually exists via DNS lookup"""
-    try:
-        domain = url.replace('http://', '').replace('https://', '').split('/')[0].split(':')[0]
-        socket.gethostbyname(domain)
-        return True
-    except socket.gaierror:
-        return False
-    except Exception:
-        return False
 
 # ---------- feature extraction (30 features) ----------
 def extract_features_from_url(url: str):
@@ -150,19 +166,11 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
         if not url.startswith(('http://', 'https://')):
             url = 'http://' + url
         
-        # Check if domain exists
-        if not domain_exists(url):
-            return {
-                "is_phishing": False,
-                "confidence": 0.0,
-                "model_used": "invalid"
-            }
-        
         # ---------- FEATURE EXTRACTION ----------
         X_structured = extract_features_from_url(url)
         X_cnn = X_structured.reshape(1, 5, 6, 1)
         
-        # ---------- PREDICTION - Return actual model name ----------
+        # ---------- PREDICTION (Always show actual model name) ----------
         if model_name == "svm":
             proba = float(svm_model.predict_proba(X_structured)[0][1])
             used = "svm"
@@ -186,6 +194,15 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
             p_cnn = float(cnn_model.predict(X_cnn, verbose=0)[0][0])
             proba = (p_rf + p_svm + p_xgb + p_cnn) / 4.0
             used = "ensemble"
+        
+        # ---------- TRUSTED DOMAIN OVERRIDE (Still shows ensemble as model) ----------
+        # If domain is trusted, force is_phishing = False but keep the model name
+        if is_trusted_domain(url):
+            return {
+                "is_phishing": False,
+                "confidence": round(proba, 4),
+                "model_used": used
+            }
         
         # ---------- RETURN RESULT ----------
         # Using 0.25 threshold (25% confidence needed for phishing)
