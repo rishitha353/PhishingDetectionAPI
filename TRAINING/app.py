@@ -153,10 +153,9 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
             proba = (p_rf + p_svm + p_xgb + p_cnn) / 4.0
             used = "ensemble"
         
-        # ---------- RETURN RESULT ----------
-        # Using 0.4 threshold (40% confidence needed for phishing)
-        # This balances between catching phishing and avoiding false positives
-        is_phishing = proba >= 0.4
+                # ---------- RETURN RESULT ----------
+        # Using 0.25 threshold (25% confidence needed for phishing)
+        is_phishing = proba >= 0.25
         
         return {
             "is_phishing": is_phishing,
