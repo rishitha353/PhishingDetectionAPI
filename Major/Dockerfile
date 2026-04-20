@@ -17,8 +17,8 @@ WORKDIR /app
 # Copy the built JAR from the previous stage
 COPY --from=build /app/target/*.jar app.jar
 
-# This line explicitly adds the PostgreSQL driver JAR to the image
-ADD https://jdbc.postgresql.org/download/postgresql-42.7.4.jar /app/postgresql.jar
+# Expose the port your application runs on
+EXPOSE 8080
 
-# Run the application with both the app JAR and the PostgreSQL driver in the classpath
-ENTRYPOINT ["java", "-cp", "app.jar:postgresql.jar", "org.springframework.boot.loader.JarLauncher"]
+# Run the JAR file
+ENTRYPOINT ["java", "-jar", "app.jar"]
