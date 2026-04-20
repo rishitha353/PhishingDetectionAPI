@@ -86,7 +86,7 @@ def extract_features_from_url(url: str):
 # ---------- request model ----------
 class UrlRequest(BaseModel):
     url: str
-    model_type: str = "rf"   # "rf", "svm", "xgb", "cnn", "ensemble"
+    model_type: str = "ensemble"  # default to ensemble
 
 
 # ---------- response model ----------
@@ -104,6 +104,7 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
         model_name = req.model_type.lower()
         
         # ---------- URL VALIDATION ----------
+        # Check if URL is empty
         if not url or len(url) == 0:
             return {
                 "is_phishing": False,
@@ -111,6 +112,7 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
                 "model_used": "invalid"
             }
         
+        # Check if it looks like a URL (has a dot or http)
         if '.' not in url and not url.startswith(('http://', 'https://')):
             return {
                 "is_phishing": False,
@@ -118,6 +120,7 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
                 "model_used": "invalid"
             }
         
+        # Add http:// if missing
         if not url.startswith(('http://', 'https://')):
             url = 'http://' + url
         
@@ -138,23 +141,25 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
             proba = float(cnn_model.predict(X_cnn, verbose=0)[0][0])
             used = "cnn"
             
-        elif model_name == "ensemble":
-            # Use all 4 models for ensemble
+        elif model_name == "rf":
+            proba = float(rf_model.predict_proba(X_structured)[0][1])
+            used = "rf"
+            
+        else:  # default to ensemble (all 4 models)
             p_rf = float(rf_model.predict_proba(X_structured)[0][1])
             p_svm = float(svm_model.predict_proba(X_structured)[0][1])
             p_xgb = float(xgb_model.predict_proba(X_structured)[0][1])
             p_cnn = float(cnn_model.predict(X_cnn, verbose=0)[0][0])
             proba = (p_rf + p_svm + p_xgb + p_cnn) / 4.0
             used = "ensemble"
-            
-        else:  # default to Random Forest
-            proba = float(rf_model.predict_proba(X_structured)[0][1])
-            used = "rf"
         
         # ---------- RETURN RESULT ----------
-        # Using 0.5 threshold (50% confidence needed for phishing)
+        # Using 0.4 threshold (40% confidence needed for phishing)
+        # This balances between catching phishing and avoiding false positives
+        is_phishing = proba >= 0.4
+        
         return {
-            "is_phishing": proba >= 0.5,
+            "is_phishing": is_phishing,
             "confidence": round(proba, 4),
             "model_used": used
         }
