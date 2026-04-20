@@ -30,6 +30,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            margin: 5px;
         }
         button:hover {
             background-color: #0056b3;
@@ -55,11 +56,26 @@
         .success {
             color: green;
         }
+        .phishing {
+            color: red;
+            font-weight: bold;
+        }
+        .safe {
+            color: green;
+            font-weight: bold;
+        }
         h1 {
             color: #333;
         }
         hr {
             margin: 20px 0;
+        }
+        .example-buttons {
+            margin: 10px 0;
+        }
+        .example-buttons button {
+            background-color: #6c757d;
+            font-size: 12px;
         }
     </style>
 </head>
@@ -83,6 +99,12 @@
             <option value="ensemble">Ensemble (All Models)</option>
         </select>
         
+        <div class="example-buttons">
+            <button onclick="setUrl('http://google.com')">Safe: google.com</button>
+            <button onclick="setUrl('http://paypal.com.login.xyz')">Phishing: paypal.com.login.xyz</button>
+            <button onclick="setUrl('http://bankofamerica.secure-login.xyz')">Phishing: bank login</button>
+        </div>
+        
         <button onclick="testJavaAPI()">Test Java API</button>
         
         <hr>
@@ -104,12 +126,24 @@
         const JAVA_API_URL = 'https://phishing-java-api.onrender.com/api/phishing/predict';
         const PYTHON_API_URL = 'https://phishing-python-api.onrender.com/predict';
         
+        function setUrl(url) {
+            document.getElementById('url').value = url;
+        }
+        
         async function testJavaAPI() {
             const url = document.getElementById('url').value;
             const modelType = document.getElementById('modelType').value;
             const loading = document.getElementById('loading');
             const resultDiv = document.getElementById('result');
             const responseText = document.getElementById('responseText');
+            
+            // Check for empty URL
+            if (!url || url.trim() === '') {
+                loading.style.display = 'none';
+                resultDiv.style.display = 'block';
+                responseText.innerHTML = '❌ Invalid URL - Please enter a valid URL';
+                return;
+            }
             
             loading.style.display = 'block';
             resultDiv.style.display = 'none';
@@ -132,9 +166,16 @@
                 loading.style.display = 'none';
                 resultDiv.style.display = 'block';
                 
-                if (response.ok) {
-                    const isPhishing = data.is_phishing ? '⚠️ PHISHING DETECTED' : '✅ SAFE';
-                    responseText.innerHTML = `Status: ${isPhishing}\nConfidence: ${(data.confidence * 100).toFixed(1)}%\nModel Used: ${data.model_used}\n\nFull Response:\n${JSON.stringify(data, null, 2)}`;
+                // Check if response is invalid
+                if (data.model_used === 'invalid') {
+                    responseText.innerHTML = '❌ Invalid URL - Please enter a valid URL';
+                } else if (response.ok) {
+                    const isPhishing = data.is_phishing;
+                    const confidencePercent = (data.confidence * 100).toFixed(1);
+                    const statusText = isPhishing ? '⚠️ PHISHING DETECTED' : '✅ SAFE';
+                    const statusClass = isPhishing ? 'phishing' : 'safe';
+                    
+                    responseText.innerHTML = `URL: ${url}\n\nStatus: <span class="${statusClass}">${statusText}</span>\nConfidence: ${confidencePercent}%\nModel Used: ${data.model_used}`;
                 } else {
                     responseText.innerHTML = `Error: ${JSON.stringify(data)}`;
                 }
@@ -150,6 +191,14 @@
             const loading = document.getElementById('loading');
             const resultDiv = document.getElementById('result');
             const responseText = document.getElementById('responseText');
+            
+            // Check for empty URL
+            if (!url || url.trim() === '') {
+                loading.style.display = 'none';
+                resultDiv.style.display = 'block';
+                responseText.innerHTML = '❌ Invalid URL - Please enter a valid URL';
+                return;
+            }
             
             loading.style.display = 'block';
             resultDiv.style.display = 'none';
@@ -172,9 +221,15 @@
                 loading.style.display = 'none';
                 resultDiv.style.display = 'block';
                 
-                if (response.ok) {
-                    const isPhishing = data.is_phishing ? '⚠️ PHISHING DETECTED' : '✅ SAFE';
-                    responseText.innerHTML = `Status: ${isPhishing}\nConfidence: ${(data.confidence * 100).toFixed(1)}%\nModel Used: ${data.model_used}\n\nFull Response:\n${JSON.stringify(data, null, 2)}`;
+                if (data.model_used === 'invalid') {
+                    responseText.innerHTML = '❌ Invalid URL - Please enter a valid URL';
+                } else if (response.ok) {
+                    const isPhishing = data.is_phishing;
+                    const confidencePercent = (data.confidence * 100).toFixed(1);
+                    const statusText = isPhishing ? '⚠️ PHISHING DETECTED' : '✅ SAFE';
+                    const statusClass = isPhishing ? 'phishing' : 'safe';
+                    
+                    responseText.innerHTML = `URL: ${url}\n\nStatus: <span class="${statusClass}">${statusText}</span>\nConfidence: ${confidencePercent}%\nModel Used: ${data.model_used}`;
                 } else {
                     responseText.innerHTML = `Error: ${JSON.stringify(data)}`;
                 }
