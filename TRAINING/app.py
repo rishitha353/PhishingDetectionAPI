@@ -144,21 +144,21 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
             used = "cnn"
             
         elif model_name == "ensemble":
-            p_rf = float(rf_model.predict_proba(X_structured)[0][1])
-            p_svm = float(svm_model.predict_proba(X_structured)[0][1])
+            # OPTIMIZED ENSEMBLE: Use only accurate models (XGBoost and CNN)
+            # RF and SVM removed because they give false positives on safe URLs
             p_xgb = float(xgb_model.predict_proba(X_structured)[0][1])
             p_cnn = float(cnn_model.predict(X_cnn, verbose=0)[0][0])
-            proba = (p_rf + p_svm + p_xgb + p_cnn) / 4.0
-            used = "ensemble"
+            proba = (p_xgb + p_cnn) / 2.0
+            used = "ensemble_optimized"
             
         else:  # default to Random Forest
             proba = float(rf_model.predict_proba(X_structured)[0][1])
             used = "rf"
         
         # ---------- RETURN RESULT ----------
-        # Using 0.25 threshold for phishing detection (more sensitive)
+        # Using 0.5 threshold for better accuracy (reduces false positives)
         return {
-            "is_phishing": proba >= 0.25,
+            "is_phishing": proba >= 0.5,
             "confidence": round(proba, 4),
             "model_used": used
         }
