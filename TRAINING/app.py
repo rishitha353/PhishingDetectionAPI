@@ -19,63 +19,24 @@ cnn_model = tf.keras.models.load_model("models/cnn_model.h5")
 
 print("✅ All models loaded successfully")
 
-# ---------- TRUSTED DOMAINS (Always SAFE) ----------
-TRUSTED_DOMAINS = [
-    'onrender.com',
-    'render.com',
-    'google.com',
-    'github.com',
-    'stackoverflow.com',
-    'localhost',
-    '127.0.0.1',
-    'microsoft.com',
-    'apple.com',
-    'amazon.com',
-    'facebook.com',
-    'twitter.com',
-    'linkedin.com'
-]
-
 # ---------- URL validation functions ----------
-def is_trusted_domain(url: str) -> bool:
-    """Check if the URL belongs to a trusted domain"""
-    try:
-        # Extract domain from URL
-        parsed = urlparse(url)
-        domain = parsed.netloc.lower()
-        
-        # Remove www. prefix if present
-        if domain.startswith('www.'):
-            domain = domain[4:]
-        
-        # Check if domain is in trusted list or ends with trusted domain
-        for trusted in TRUSTED_DOMAINS:
-            if domain == trusted or domain.endswith('.' + trusted):
-                return True
-        return False
-    except Exception:
-        return False
-
 def is_valid_url_format(url: str) -> bool:
     """Check if URL has valid format"""
-    # Reject URLs with commas, spaces, or invalid characters
     if ',' in url or ' ' in url:
         return False
     
-    # Basic URL pattern
     url_pattern = re.compile(
-        r'^(https?:\/\/)?'  # http:// or https:// (optional)
-        r'([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+'  # domain name
-        r'[a-zA-Z]{2,}'  # TLD (com, org, net, etc.)
-        r'(:\d+)?'  # port (optional)
-        r'(\/.*)?$'  # path (optional)
+        r'^(https?:\/\/)?'
+        r'([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+'
+        r'[a-zA-Z]{2,}'
+        r'(:\d+)?'
+        r'(\/.*)?$'
     )
     return url_pattern.match(url) is not None
 
 def domain_exists(url: str) -> bool:
     """Check if the domain actually exists via DNS lookup"""
     try:
-        # Extract domain from URL
         domain = url.replace('http://', '').replace('https://', '').split('/')[0].split(':')[0]
         socket.gethostbyname(domain)
         return True
@@ -154,7 +115,7 @@ def extract_features_from_url(url: str):
 # ---------- request model ----------
 class UrlRequest(BaseModel):
     url: str
-    model_type: str = "ensemble"  # default to ensemble
+    model_type: str = "ensemble"
 
 
 # ---------- response model ----------
@@ -172,7 +133,6 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
         model_name = req.model_type.lower()
         
         # ---------- URL VALIDATION ----------
-        # Check if URL is empty
         if not url or len(url) == 0:
             return {
                 "is_phishing": False,
@@ -180,7 +140,6 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
                 "model_used": "invalid"
             }
         
-        # Check URL format
         if not is_valid_url_format(url):
             return {
                 "is_phishing": False,
@@ -188,19 +147,10 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
                 "model_used": "invalid"
             }
         
-        # Add http:// if missing
         if not url.startswith(('http://', 'https://')):
             url = 'http://' + url
         
-        # ---------- TRUSTED DOMAIN CHECK (Always SAFE) ----------
-        if is_trusted_domain(url):
-            return {
-                "is_phishing": False,
-                "confidence": 0.0,
-                "model_used": "trusted_safe"
-            }
-        
-        # Check if domain exists (DNS lookup)
+        # Check if domain exists
         if not domain_exists(url):
             return {
                 "is_phishing": False,
@@ -212,7 +162,7 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
         X_structured = extract_features_from_url(url)
         X_cnn = X_structured.reshape(1, 5, 6, 1)
         
-        # ---------- PREDICTION ----------
+        # ---------- PREDICTION - Return actual model name ----------
         if model_name == "svm":
             proba = float(svm_model.predict_proba(X_structured)[0][1])
             used = "svm"
@@ -229,7 +179,7 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
             proba = float(rf_model.predict_proba(X_structured)[0][1])
             used = "rf"
             
-        else:  # default to ensemble (all 4 models)
+        else:  # ensemble - uses all 4 models
             p_rf = float(rf_model.predict_proba(X_structured)[0][1])
             p_svm = float(svm_model.predict_proba(X_structured)[0][1])
             p_xgb = float(xgb_model.predict_proba(X_structured)[0][1])
