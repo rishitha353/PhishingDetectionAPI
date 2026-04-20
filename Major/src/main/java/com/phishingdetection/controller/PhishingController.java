@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/phishing")
 public class PhishingController {
@@ -24,12 +25,17 @@ public class PhishingController {
 
     @PostMapping("/predict")
     public ResponseEntity<PredictionResponse> predict(@RequestBody UrlRequest request) {
-        PredictionResponse resp = service.predict(request);
-        return ResponseEntity.ok(resp);
+        PredictionResponse response = service.predict(request);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/history")
     public ResponseEntity<List<UrlCheck>> getHistory() {
         return ResponseEntity.ok(repository.findAll());
+    }
+
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Java API is running!");
     }
 }
