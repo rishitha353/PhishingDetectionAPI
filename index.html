@@ -17,6 +17,7 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 .btn{padding:8px 18px;border-radius:8px;border:none;cursor:pointer}
 .btn-outline{border:1px solid #6ea8ff;background:transparent;color:#6ea8ff}
 .btn-primary{background:#3b82f6;color:white}
+.btn-history{background:#1e293b;border:1px solid #6ea8ff;color:#6ea8ff}
 
 /* HERO */
 .hero{display:flex;justify-content:space-between;align-items:center;padding:80px 60px;background:radial-gradient(circle at right,#1e3a8a,#020617)}
@@ -44,12 +45,6 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 .step{max-width:200px}
 .step-num{width:40px;height:40px;background:#3b82f6;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:auto;margin-bottom:10px;font-weight:bold}
 
-/* STATS */
-.stats{display:flex;justify-content:space-around;padding:40px;background:#0b1220;border-top:1px solid rgba(255,255,255,0.05);flex-wrap:wrap}
-.stat{text-align:center}
-.stat h2{color:#6ea8ff}
-.stat p{font-size:12px;color:#94a3b8}
-
 /* Result Card */
 .result-card{margin-top:20px;padding:20px;border-radius:12px;display:none}
 .result-card.phishing{background:#7f1a1a;border:1px solid #ef4444}
@@ -58,18 +53,21 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 .result-status{font-size:20px;font-weight:700;margin-bottom:10px}
 .result-confidence{font-size:14px;margin-top:5px}
 
-/* Modal */
+/* History Modal */
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:1000;justify-content:center;align-items:center}
-.modal-content{background:#1e293b;padding:40px;border-radius:16px;max-width:450px;width:90%;text-align:center}
-.modal-content input{width:100%;padding:12px;margin:10px 0;border-radius:8px;border:1px solid #334155;background:#0f172a;color:white}
-.modal-content button{width:100%;padding:12px;margin-top:10px;background:#3b82f6;color:white;border:none;border-radius:8px;cursor:pointer}
-.switch-link{margin-top:15px;color:#6ea8ff;cursor:pointer}
-.close-link{margin-top:10px;color:#94a3b8;cursor:pointer}
-
-/* User Info */
-.user-info{display:flex;align-items:center;gap:15px}
-.user-name{color:#6ea8ff;font-weight:500}
-.logout-btn{background:transparent;border:1px solid #ef4444;color:#ef4444;padding:6px 12px;border-radius:6px;cursor:pointer}
+.modal-content{background:#1e293b;padding:30px;border-radius:16px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto}
+.modal-content h2{margin-bottom:20px;color:#6ea8ff}
+.history-list{list-style:none}
+.history-list li{background:#0f172a;margin:10px 0;padding:15px;border-radius:8px;border-left:4px solid #3b82f6}
+.history-url{color:#6ea8ff;word-break:break-all}
+.history-result{margin-top:8px;font-size:13px}
+.history-phishing{color:#ef4444}
+.history-safe{color:#10b981}
+.history-time{font-size:11px;color:#94a3b8;margin-top:5px}
+.clear-btn{background:#ef4444;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;margin-top:20px}
+.clear-btn:hover{background:#dc2626}
+.close-btn{background:#334155;color:white;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;margin-left:10px}
+.empty-history{text-align:center;color:#94a3b8;padding:40px}
 
 /* Quick Buttons */
 .quick-buttons{display:flex;gap:10px;margin-top:15px;flex-wrap:wrap}
@@ -94,14 +92,7 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 <a href="#">Check URL</a>
 <a href="#">Features</a>
 <a href="#">API</a>
-<div id="authSection">
-<button class="btn btn-outline" onclick="openModal('login')">Sign In</button>
-<button class="btn btn-primary" onclick="openModal('signup')">Sign Up</button>
-</div>
-<div id="userSection" style="display:none" class="user-info">
-<span class="user-name" id="userName"></span>
-<button class="logout-btn" onclick="logout()">Logout</button>
-</div>
+<button class="btn btn-history" onclick="openHistory()">📜 History</button>
 </div>
 </div>
 
@@ -141,146 +132,79 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 </div>
 </div>
 
-<div class="stats">
-<div class="stat"><h2>15M+</h2><p>URLs Analyzed</p></div>
-<div class="stat"><h2>98.7%</h2><p>Accuracy</p></div>
-<div class="stat"><h2>250K+</h2><p>Users</p></div>
-<div class="stat"><h2>200+</h2><p>Countries</p></div>
-</div>
-
-<!-- Auth Modal -->
-<div id="authModal" class="modal">
+<!-- History Modal -->
+<div id="historyModal" class="modal">
 <div class="modal-content">
-<h2 id="modalTitle">Sign Up</h2>
-<div id="signupForm">
-<input type="text" id="signupEmail" placeholder="Email">
-<input type="text" id="signupUsername" placeholder="Username">
-<input type="password" id="signupPassword" placeholder="Password">
-<input type="password" id="signupConfirmPassword" placeholder="Confirm Password">
-<button onclick="signup()">Sign Up</button>
+<h2>📜 URL Check History</h2>
+<div id="historyList" class="history-list">
+<div class="empty-history">No history yet. Check some URLs!</div>
 </div>
-<div id="loginForm" style="display:none">
-<input type="text" id="loginEmail" placeholder="Email or Username">
-<input type="password" id="loginPassword" placeholder="Password">
-<button onclick="login()">Login</button>
-</div>
-<div class="switch-link" onclick="toggleAuthMode()" id="switchLink">Already have an account? Login</div>
-<div class="close-link" onclick="closeModal()">Close</div>
+<button class="clear-btn" onclick="clearHistory()">Clear All History</button>
+<button class="close-btn" onclick="closeHistory()">Close</button>
 </div>
 </div>
 
 <script>
 const API_URL = 'https://phishing-java-api.onrender.com/api/phishing/predict';
-const AUTH_URL = 'https://phishing-java-api.onrender.com/api/auth';
-let currentAuthMode = 'signup';
-let currentUser = JSON.parse(localStorage.getItem('phishguard_user') || 'null');
 
-function updateAuthUI() {
-    if (currentUser) {
-        document.getElementById('authSection').style.display = 'none';
-        document.getElementById('userSection').style.display = 'flex';
-        document.getElementById('userName').innerText = currentUser.username;
+// Load history from localStorage
+let history = JSON.parse(localStorage.getItem('phishguard_history') || '[]');
+
+function saveHistory() {
+    localStorage.setItem('phishguard_history', JSON.stringify(history));
+}
+
+function addToHistory(url, result, isPhishing, confidence) {
+    const entry = {
+        url: url,
+        result: result,
+        isPhishing: isPhishing,
+        confidence: confidence,
+        timestamp: new Date().toLocaleString()
+    };
+    history.unshift(entry); // Add to beginning
+    // Keep only last 50 entries
+    if (history.length > 50) history = history.slice(0, 50);
+    saveHistory();
+}
+
+function openHistory() {
+    const historyList = document.getElementById('historyList');
+    
+    if (history.length === 0) {
+        historyList.innerHTML = '<div class="empty-history">No history yet. Check some URLs!</div>';
     } else {
-        document.getElementById('authSection').style.display = 'flex';
-        document.getElementById('userSection').style.display = 'none';
-    }
-}
-
-function openModal(mode) {
-    currentAuthMode = mode;
-    document.getElementById('modalTitle').innerText = mode === 'signup' ? 'Sign Up' : 'Login';
-    document.getElementById('signupForm').style.display = mode === 'signup' ? 'block' : 'none';
-    document.getElementById('loginForm').style.display = mode === 'login' ? 'block' : 'none';
-    document.getElementById('switchLink').innerText = mode === 'signup' ? 'Already have an account? Login' : "Don't have an account? Sign Up";
-    document.getElementById('authModal').style.display = 'flex';
-}
-
-function closeModal() {
-    document.getElementById('authModal').style.display = 'none';
-}
-
-function toggleAuthMode() {
-    openModal(currentAuthMode === 'signup' ? 'login' : 'signup');
-}
-
-async function signup() {
-    const email = document.getElementById('signupEmail').value;
-    const username = document.getElementById('signupUsername').value;
-    const password = document.getElementById('signupPassword').value;
-    const confirmPassword = document.getElementById('signupConfirmPassword').value;
-    
-    if (!email || !username || !password) {
-        alert('Please fill all fields');
-        return;
-    }
-    if (password !== confirmPassword) {
-        alert('Passwords do not match');
-        return;
+        historyList.innerHTML = history.map(entry => `
+            <li>
+                <div class="history-url">🔗 ${escapeHtml(entry.url)}</div>
+                <div class="history-result">
+                    Result: <span class="${entry.isPhishing ? 'history-phishing' : 'history-safe'}">${entry.result}</span>
+                    ${entry.confidence ? ` (${entry.confidence}% confidence)` : ''}
+                </div>
+                <div class="history-time">📅 ${entry.timestamp}</div>
+            </li>
+        `).join('');
     }
     
-    try {
-        const response = await fetch(`${AUTH_URL}/signup`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, username, password })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            alert('Account created successfully! Please login.');
-            openModal('login');
-            document.getElementById('signupEmail').value = '';
-            document.getElementById('signupUsername').value = '';
-            document.getElementById('signupPassword').value = '';
-            document.getElementById('signupConfirmPassword').value = '';
-        } else {
-            alert(data.message || 'Signup failed');
-        }
-    } catch (error) {
-        alert('Error: ' + error.message);
+    document.getElementById('historyModal').style.display = 'flex';
+}
+
+function closeHistory() {
+    document.getElementById('historyModal').style.display = 'none';
+}
+
+function clearHistory() {
+    if (confirm('Are you sure you want to clear all history?')) {
+        history = [];
+        saveHistory();
+        openHistory(); // Refresh view
     }
 }
 
-async function login() {
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-    
-    if (!email || !password) {
-        alert('Please enter email and password');
-        return;
-    }
-    
-    try {
-        const response = await fetch(`${AUTH_URL}/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            currentUser = { username: data.username, email: data.email };
-            localStorage.setItem('phishguard_user', JSON.stringify(currentUser));
-            updateAuthUI();
-            closeModal();
-            document.getElementById('loginEmail').value = '';
-            document.getElementById('loginPassword').value = '';
-            alert('Login successful!');
-        } else {
-            alert(data.message || 'Login failed');
-        }
-    } catch (error) {
-        alert('Error: ' + error.message);
-    }
-}
-
-function logout() {
-    localStorage.removeItem('phishguard_user');
-    currentUser = null;
-    updateAuthUI();
-    alert('Logged out successfully');
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 function setUrl(url) {
@@ -292,12 +216,6 @@ async function checkURL() {
     const checkBtn = document.getElementById('checkBtn');
     const loading = document.getElementById('loading');
     const resultCard = document.getElementById('resultCard');
-    
-    if (!currentUser) {
-        alert('Please sign up or login first to check URLs');
-        openModal('login');
-        return;
-    }
     
     if (!url) {
         alert('Please enter a URL');
@@ -339,6 +257,7 @@ async function checkURL() {
                 <div class="result-status">❌ INVALID URL</div>
                 <div>Please enter a valid URL format (e.g., https://example.com)</div>
             `;
+            addToHistory(url, 'INVALID URL', false, null);
         } else if (isPhishing) {
             resultCard.className = 'result-card phishing';
             resultCard.innerHTML = `
@@ -346,13 +265,16 @@ async function checkURL() {
                 <div>Risk Score: ${riskPercent}%</div>
                 <div class="result-confidence">Detected by: ${modelUsed}</div>
             `;
+            addToHistory(url, `⚠️ PHISHING DETECTED (${riskPercent}% risk)`, true, riskPercent);
         } else {
+            const safePercent = ((1 - confidence) * 100).toFixed(1);
             resultCard.className = 'result-card safe';
             resultCard.innerHTML = `
                 <div class="result-status">✅ LEGITIMATE WEBSITE</div>
-                <div>Confidence: ${(1 - confidence) * 100}% safe</div>
+                <div>Confidence: ${safePercent}% safe</div>
                 <div class="result-confidence">Analyzed by: ${modelUsed}</div>
             `;
+            addToHistory(url, `✅ LEGITIMATE (${safePercent}% safe)`, false, safePercent);
         }
     } catch (error) {
         clearTimeout(timeoutId);
@@ -365,12 +287,14 @@ async function checkURL() {
                 <div>The service is waking up. Please wait 30 seconds and try again.</div>
                 <div class="result-confidence">Note: First request after inactivity takes 30-60 seconds.</div>
             `;
+            addToHistory(url, 'REQUEST TIMEOUT - Service waking up', false, null);
         } else {
             resultCard.innerHTML = `
                 <div class="result-status">🔄 SERVICE STARTING</div>
                 <div>Please wait 30 seconds and click "Check URL" again.</div>
                 <div class="result-confidence">The server is waking up from sleep mode.</div>
             `;
+            addToHistory(url, 'SERVICE STARTING - Please retry', false, null);
         }
     } finally {
         clearTimeout(timeoutId);
@@ -383,7 +307,13 @@ document.getElementById('urlInput').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') checkURL();
 });
 
-updateAuthUI();
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('historyModal');
+    if (event.target === modal) {
+        closeHistory();
+    }
+}
 </script>
 </body>
 </html>
