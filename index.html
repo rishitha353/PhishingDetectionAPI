@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhishShield - AI Phishing Detection</title>
+    <title>PhishGuard - Phishing Detection</title>
     <style>
         * {
             margin: 0;
@@ -12,111 +12,153 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            color: #333;
         }
 
-        .dashboard {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        .sidebar {
-            width: 280px;
+        /* Navbar */
+        .navbar {
             background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(10px);
-            padding: 30px 20px;
-            box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #e0e0e0;
+            gap: 10px;
         }
 
-        .logo-icon { font-size: 32px; }
-        .logo-text h2 { font-size: 18px; color: #333; margin-bottom: 4px; }
-        .logo-text p { font-size: 12px; color: #666; }
+        .logo-icon {
+            font-size: 28px;
+        }
 
-        .nav-menu { list-style: none; }
-        .nav-item { margin-bottom: 8px; }
-        .nav-link {
+        .logo-text {
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-links {
             display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-radius: 12px;
-            color: #555;
+            gap: 32px;
+        }
+
+        .nav-links a {
             text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .nav-link:hover { background: #f0f0f0; color: #667eea; }
-        .nav-link.active { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
-        .nav-link .icon { font-size: 20px; }
-
-        .main-content {
-            flex: 1;
-            margin-left: 280px;
-            padding: 30px 40px;
+            color: #555;
+            font-weight: 500;
+            transition: color 0.3s;
         }
 
-        .header { margin-bottom: 30px; }
-        .header h1 { font-size: 28px; color: white; margin-bottom: 8px; }
-        .header p { color: rgba(255, 255, 255, 0.8); font-size: 14px; }
+        .nav-links a:hover {
+            color: #667eea;
+        }
 
-        .card {
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 16px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Input Card */
+        .input-card {
             background: white;
-            border-radius: 20px;
-            padding: 30px;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
         }
 
         .input-group {
             display: flex;
             gap: 15px;
-            margin-bottom: 20px;
+            max-width: 700px;
+            margin: 0 auto 15px;
         }
 
         .url-input {
             flex: 1;
-            padding: 16px 20px;
+            padding: 18px 24px;
             border: 2px solid #e0e0e0;
-            border-radius: 12px;
+            border-radius: 50px;
             font-size: 16px;
+            transition: all 0.3s;
         }
+
         .url-input:focus {
             outline: none;
             border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         .check-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 16px 32px;
-            border-radius: 12px;
+            padding: 18px 36px;
+            border-radius: 50px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
+            transition: transform 0.2s;
         }
-        .check-btn:hover { transform: translateY(-2px); }
-        .check-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
+        .check-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .check-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .privacy-note {
+            color: #888;
+            font-size: 14px;
+        }
+
+        /* Loading */
         .loading {
             display: none;
             text-align: center;
-            padding: 40px;
+            padding: 30px;
         }
+
         .spinner {
             width: 50px;
             height: 50px;
@@ -126,337 +168,321 @@
             animation: spin 1s linear infinite;
             margin: 0 auto 15px;
         }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
 
+        /* Result Card */
         .result-card {
             background: white;
-            border-radius: 20px;
-            padding: 30px;
-            margin-top: 25px;
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            margin-top: 30px;
             display: none;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
         }
 
-        .result-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #f0f0f0;
+        .result-status {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 20px;
         }
 
-        .result-status { font-size: 24px; font-weight: 700; }
-        .phishing { color: #dc2626; }
-        .safe { color: #10b981; }
-
-        .risk-score { font-size: 36px; font-weight: 800; color: #333; }
-
-        .risk-bar-container { margin: 20px 0; }
-        .risk-bar {
-            height: 12px;
-            background: #e0e0e0;
-            border-radius: 10px;
-            overflow: hidden;
+        .result-status.phishing {
+            color: #dc2626;
         }
-        .risk-fill {
-            height: 100%;
-            width: 0%;
-            transition: width 0.5s ease;
-        }
-        .risk-fill.high { background: linear-gradient(90deg, #f97316, #dc2626); }
-        .risk-fill.medium { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
-        .risk-fill.low { background: linear-gradient(90deg, #34d399, #10b981); }
 
-        .risk-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
+        .result-status.safe {
+            color: #10b981;
+        }
+
+        .result-status.invalid {
+            color: #f59e0b;
+        }
+
+        .result-confidence {
+            font-size: 18px;
             color: #666;
-            margin-top: 8px;
+            margin-bottom: 20px;
         }
 
-        .findings { margin-top: 25px; padding-top: 20px; border-top: 1px solid #e0e0e0; }
-        .findings h4 { margin-bottom: 15px; color: #333; }
-        .finding-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px solid #f0f0f0;
+        .result-confidence span {
+            font-weight: 700;
+            color: #333;
         }
-        .finding-icon { font-size: 20px; }
-        .finding-text { flex: 1; color: #555; }
 
-        .copy-btn {
-            background: #f0f0f0;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 20px;
+        .result-model {
             font-size: 14px;
+            color: #888;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
         }
-        .copy-btn:hover { background: #e0e0e0; }
 
-        .quick-actions {
+        /* How It Works Section */
+        .how-it-works {
+            background: white;
+            border-radius: 24px;
+            padding: 50px;
+            margin-top: 50px;
+            text-align: center;
+        }
+
+        .how-it-works h2 {
+            font-size: 28px;
+            margin-bottom: 40px;
+            color: #333;
+        }
+
+        .steps {
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
+            justify-content: space-between;
+            gap: 30px;
             flex-wrap: wrap;
         }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 auto 20px;
+        }
+
+        .step h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .step p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Why It Matters */
+        .why-matters {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 40px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .why-matters h2 {
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .why-matters p {
+            color: #666;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Quick Buttons */
+        .quick-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
         .quick-btn {
             background: #f0f0f0;
             border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 13px;
             cursor: pointer;
+            transition: background 0.2s;
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
+        .quick-btn:hover {
+            background: #e0e0e0;
         }
-        .stat-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-            padding: 20px;
-            border-radius: 16px;
+
+        /* Footer */
+        .footer {
             text-align: center;
-        }
-        .stat-number { font-size: 32px; font-weight: 800; color: #667eea; }
-        .stat-label { font-size: 14px; color: #666; margin-top: 8px; }
-
-        pre {
-            background: #f0f0f0;
-            padding: 15px;
-            border-radius: 10px;
-            overflow-x: auto;
-            font-size: 12px;
+            padding: 30px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
         }
 
         @media (max-width: 768px) {
-            .sidebar { width: 80px; padding: 20px 10px; }
-            .logo-text, .nav-link span { display: none; }
-            .main-content { margin-left: 80px; padding: 20px; }
-            .input-group { flex-direction: column; }
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px 20px;
+            }
+            .nav-links {
+                gap: 20px;
+            }
+            .container {
+                padding: 30px 20px;
+            }
+            .hero h1 {
+                font-size: 32px;
+            }
+            .input-group {
+                flex-direction: column;
+            }
+            .steps {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="dashboard">
-        <div class="sidebar">
-            <div class="logo">
-                <div class="logo-icon">🛡️</div>
-                <div class="logo-text">
-                    <h2>PhishShield</h2>
-                    <p>AI Detection</p>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <span class="logo-icon">🛡️</span>
+            <span class="logo-text">PhishGuard</span>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="nav-link" data-page="home">Home</a>
+            <a href="#" class="nav-link" data-page="check">Check URL</a>
+            <a href="#" class="nav-link" data-page="resources">Resources</a>
+            <a href="#" class="nav-link" data-page="about">About</a>
+            <a href="#" class="nav-link" data-page="contact">Contact</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container" id="mainContainer">
+        <!-- Home Page (Default) -->
+        <div id="homePage">
+            <div class="hero">
+                <h1>Detect Phishing. Stay Protected.</h1>
+                <p>PhishGuard helps you identify phishing websites and potentially malicious links before they can harm you.</p>
+            </div>
+
+            <div class="input-card">
+                <div class="input-group">
+                    <input type="text" id="urlInput" class="url-input" placeholder="Enter a URL to check for phishing...">
+                    <button id="checkBtn" class="check-btn">🔍 Check URL</button>
+                </div>
+                <div class="quick-buttons">
+                    <button class="quick-btn" onclick="setUrl('https://google.com')">Safe: google.com</button>
+                    <button class="quick-btn" onclick="setUrl('http://paypal.com.login.xyz')">Phishing: paypal.com.login.xyz</button>
+                    <button class="quick-btn" onclick="setUrl('invalid-url')">Test: Invalid URL</button>
+                </div>
+                <p class="privacy-note">Your checks are private and secure</p>
+
+                <div id="loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Analyzing URL...</p>
+                </div>
+
+                <div id="resultCard" class="result-card">
+                    <div id="resultStatus" class="result-status"></div>
+                    <div id="resultConfidence" class="result-confidence"></div>
+                    <div id="resultModel" class="result-model"></div>
                 </div>
             </div>
-            <ul class="nav-menu">
-                <li class="nav-item"><a class="nav-link active" data-page="analyzer"><span class="icon">🔍</span><span>Analyzer</span></a></li>
-                <li class="nav-item"><a class="nav-link" data-page="dashboard"><span class="icon">📊</span><span>Dashboard</span></a></li>
-                <li class="nav-item"><a class="nav-link" data-page="history"><span class="icon">🕒</span><span>History</span></a></li>
-                <li class="nav-item"><a class="nav-link" data-page="api-docs"><span class="icon">📚</span><span>API Docs</span></a></li>
-                <li class="nav-item"><a class="nav-link" data-page="about"><span class="icon">ℹ️</span><span>About</span></a></li>
-            </ul>
-            <div style="margin-top: auto; padding-top: 40px;">
-                <div class="nav-item"><a class="nav-link" data-page="admin"><span class="icon">👤</span><span>Admin</span></a></div>
+
+            <div class="how-it-works">
+                <h2>How It Works</h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h3>Submit URL</h3>
+                        <p>Enter a suspicious URL you want to check.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h3>Analyze</h3>
+                        <p>Our AI system analyzes the URL using multiple detection models.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h3>Get Results</h3>
+                        <p>Receive instant verdict: Phishing, Legitimate, or Invalid.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="why-matters">
+                <h2>Why It Matters</h2>
+                <p>Phishing attacks are one of the most common cyber threats today. They can steal your personal information, compromise your identity, and lead to financial loss. PhishGuard helps you protect yourself from these threats by identifying phishing websites and malicious links before they can harm you.</p>
             </div>
         </div>
 
-        <div class="main-content">
-            <div id="analyzer-page">
-                <div class="header">
-                    <h1>🔍 URL Analyzer</h1>
-                    <p>Enter a URL to check if it's a phishing website</p>
-                </div>
-                <div class="card">
-                    <div class="input-group">
-                        <input type="text" id="urlInput" class="url-input" placeholder="https://example.com">
-                        <button id="checkBtn" class="check-btn">CHECK NOW</button>
-                    </div>
-                    <div class="quick-actions">
-                        <button class="quick-btn" onclick="setUrl('https://google.com')">Safe: google.com</button>
-                        <button class="quick-btn" onclick="setUrl('http://paypal.com.login.xyz')">Phishing: paypal.com.login.xyz</button>
-                        <button class="quick-btn" onclick="setUrl('https://phishing-api-test.onrender.com')">Test Page</button>
-                    </div>
-
-                    <div id="loading" class="loading">
-                        <div class="spinner"></div>
-                        <p>Analyzing URL with AI models...</p>
-                    </div>
-
-                    <div id="resultCard" class="result-card">
-                        <div class="result-header">
-                            <div>
-                                <div id="resultStatus" class="result-status"></div>
-                                <div id="resultModel" style="font-size: 12px; color: #666; margin-top: 5px;"></div>
-                            </div>
-                            <div>
-                                <div class="risk-score" id="riskScore">0%</div>
-                                <div style="font-size: 12px; color: #666;">Risk Score</div>
-                            </div>
-                        </div>
-
-                        <div class="risk-bar-container">
-                            <div class="risk-bar">
-                                <div id="riskFill" class="risk-fill" style="width: 0%;"></div>
-                            </div>
-                            <div class="risk-labels">
-                                <span>Safe (0%)</span>
-                                <span>Suspicious (50%)</span>
-                                <span>High Risk (100%)</span>
-                            </div>
-                        </div>
-
-                        <div id="findings" class="findings">
-                            <h4>🔍 Findings & Analysis</h4>
-                            <div id="findingsList"></div>
-                        </div>
-
-                        <button id="copyBtn" class="copy-btn" onclick="copyResult()">📋 Copy Report</button>
-                    </div>
-                </div>
+        <!-- Other Pages (Simple Placeholders) -->
+        <div id="checkPage" style="display: none;">
+            <div class="hero">
+                <h1>Check URL</h1>
+                <p>Enter a URL to check if it's a phishing website</p>
             </div>
-
-            <div id="dashboard-page" style="display: none;">
-                <div class="header"><h1>📊 Dashboard</h1><p>Analytics and statistics</p></div>
-                <div class="card">
-                    <div class="stats-grid">
-                        <div class="stat-card"><div class="stat-number" id="totalScans">0</div><div class="stat-label">Total URLs Scanned</div></div>
-                        <div class="stat-card"><div class="stat-number" id="phishingCount">0</div><div class="stat-label">Phishing Detected</div></div>
-                        <div class="stat-card"><div class="stat-number" id="safeCount">0</div><div class="stat-label">Safe URLs</div></div>
-                        <div class="stat-card"><div class="stat-number" id="accuracy">95%</div><div class="stat-label">Model Accuracy</div></div>
-                    </div>
+            <div class="input-card">
+                <div class="input-group">
+                    <input type="text" id="urlInput2" class="url-input" placeholder="Enter a URL to check for phishing...">
+                    <button id="checkBtn2" class="check-btn">🔍 Check URL</button>
                 </div>
-            </div>
-
-            <div id="history-page" style="display: none;">
-                <div class="header"><h1>🕒 Scan History</h1><p>Previously analyzed URLs</p></div>
-                <div class="card"><div id="historyList" style="max-height: 500px; overflow-y: auto;"><p style="color: #666; text-align: center;">No scans yet. Try analyzing a URL!</p></div></div>
-            </div>
-
-            <div id="api-docs-page" style="display: none;">
-                <div class="header"><h1>📚 API Documentation</h1><p>How to integrate with our API</p></div>
-                <div class="card">
-                    <h3>POST /predict</h3>
-                    <pre>{
-    "url": "https://example.com",
-    "modelType": "ensemble"
-}</pre>
-                    <h3 style="margin-top: 20px;">Response</h3>
-                    <pre>{
-    "is_phishing": false,
-    "confidence": 0.2463,
-    "model_used": "ensemble"
-}</pre>
+                <div class="quick-buttons">
+                    <button class="quick-btn" onclick="setUrl2('https://google.com')">Safe: google.com</button>
+                    <button class="quick-btn" onclick="setUrl2('http://paypal.com.login.xyz')">Phishing: paypal.com.login.xyz</button>
                 </div>
-            </div>
-
-            <div id="about-page" style="display: none;">
-                <div class="header"><h1>ℹ️ About PhishShield</h1><p>Powered by AI & Machine Learning</p></div>
-                <div class="card">
-                    <h3>🛡️ What is PhishShield?</h3>
-                    <p>PhishShield is an AI-powered phishing detection system that analyzes URLs in real-time to identify potential phishing threats.</p>
-                    <h3 style="margin-top: 20px;">🧠 ML Models Used</h3>
-                    <ul style="margin-left: 20px; margin-top: 10px;">
-                        <li>Random Forest (95.71% accuracy)</li>
-                        <li>XGBoost (95.49% accuracy)</li>
-                        <li>SVM (94.36% accuracy)</li>
-                        <li>CNN (92.78% accuracy)</li>
-                        <li>Ensemble (Combined predictions)</li>
-                    </ul>
+                <div id="loading2" class="loading"><div class="spinner"></div><p>Analyzing URL...</p></div>
+                <div id="resultCard2" class="result-card">
+                    <div id="resultStatus2" class="result-status"></div>
+                    <div id="resultConfidence2" class="result-confidence"></div>
+                    <div id="resultModel2" class="result-model"></div>
                 </div>
             </div>
         </div>
+
+        <div id="resourcesPage" style="display: none;"><div class="hero"><h1>Resources</h1><p>Coming soon...</p></div></div>
+        <div id="aboutPage" style="display: none;"><div class="hero"><h1>About PhishGuard</h1><p>Powered by AI and Machine Learning to protect you from phishing attacks.</p></div></div>
+        <div id="contactPage" style="display: none;"><div class="hero"><h1>Contact</h1><p>For support, contact us at support@phishguard.com</p></div></div>
+    </div>
+
+    <div class="footer">
+        <p>© 2026 PhishGuard. Protecting you from phishing threats.</p>
     </div>
 
     <script>
         const API_URL = 'https://phishing-java-api.onrender.com/api/phishing/predict';
-        let scanHistory = JSON.parse(localStorage.getItem('scanHistory') || '[]');
         
-        function updateStats() {
-            document.getElementById('totalScans').innerText = scanHistory.length;
-            document.getElementById('phishingCount').innerText = scanHistory.filter(h => h.isPhishing).length;
-            document.getElementById('safeCount').innerText = scanHistory.filter(h => !h.isPhishing).length;
-        }
-
-        function displayHistory() {
-            const historyList = document.getElementById('historyList');
-            if (scanHistory.length === 0) {
-                historyList.innerHTML = '<p style="color: #666; text-align: center;">No scans yet. Try analyzing a URL!</p>';
-                return;
-            }
-            historyList.innerHTML = scanHistory.slice().reverse().map(h => `
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 10px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <div style="font-weight: 600; word-break: break-all;">${h.url}</div>
-                            <div style="font-size: 12px; color: #666;">${new Date(h.timestamp).toLocaleString()}</div>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="color: ${h.isPhishing ? '#dc2626' : '#10b981'}; font-weight: 600;">${h.isPhishing ? '⚠️ PHISHING' : '✅ SAFE'}</div>
-                            <div style="font-size: 14px;">Risk: ${(h.confidence * 100).toFixed(1)}%</div>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function getFindings(url, isPhishing, confidence) {
-            const findings = [];
-            if (url.includes('login') || url.includes('verify') || url.includes('secure')) {
-                findings.push({ icon: '⚠️', text: 'URL contains suspicious keywords (login, verify, secure)' });
-            }
-            if (url.includes('@')) {
-                findings.push({ icon: '⚠️', text: 'URL contains "@" symbol - commonly used in phishing' });
-            }
-            if (url.split('.').length > 3) {
-                findings.push({ icon: '⚠️', text: 'URL has multiple subdomains - possible typosquatting' });
-            }
-            if (confidence > 50) {
-                findings.push({ icon: '⚠️', text: 'High risk score - multiple phishing indicators detected' });
-            } else if (confidence > 25) {
-                findings.push({ icon: '⚠️', text: 'Medium risk - some suspicious patterns found' });
-            }
-            if (findings.length === 0) {
-                findings.push({ icon: '✅', text: 'No obvious phishing indicators detected' });
-            }
-            return findings;
-        }
-
-        function copyResult() {
-            const status = document.getElementById('resultStatus').innerText;
-            const risk = document.getElementById('riskScore').innerText;
-            navigator.clipboard.writeText(`PhishShield Report\nStatus: ${status}\nRisk Score: ${risk}\nTime: ${new Date().toLocaleString()}`);
-            alert('Report copied to clipboard!');
-        }
-
-        function setUrl(url) {
-            document.getElementById('urlInput').value = url;
-        }
-
         // Navigation
         document.querySelectorAll('.nav-link').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
                 const page = this.dataset.page;
-                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-                this.classList.add('active');
-                document.getElementById('analyzer-page').style.display = page === 'analyzer' ? 'block' : 'none';
-                document.getElementById('dashboard-page').style.display = page === 'dashboard' ? 'block' : 'none';
-                document.getElementById('history-page').style.display = page === 'history' ? 'block' : 'none';
-                document.getElementById('api-docs-page').style.display = page === 'api-docs' ? 'block' : 'none';
-                document.getElementById('about-page').style.display = page === 'about' ? 'block' : 'none';
-                if (page === 'dashboard') updateStats();
-                if (page === 'history') displayHistory();
+                document.getElementById('homePage').style.display = page === 'home' ? 'block' : 'none';
+                document.getElementById('checkPage').style.display = page === 'check' ? 'block' : 'none';
+                document.getElementById('resourcesPage').style.display = page === 'resources' ? 'block' : 'none';
+                document.getElementById('aboutPage').style.display = page === 'about' ? 'block' : 'none';
+                document.getElementById('contactPage').style.display = page === 'contact' ? 'block' : 'none';
             });
         });
+
+        function setUrl(url) {
+            document.getElementById('urlInput').value = url;
+        }
+
+        function setUrl2(url) {
+            document.getElementById('urlInput2').value = url;
+        }
 
         async function checkURL() {
             const url = document.getElementById('urlInput').value.trim();
@@ -478,47 +504,107 @@
                 });
                 
                 const data = await response.json();
-                console.log('API Response:', data);
-                
                 const isPhishing = data.is_phishing === true;
                 const confidence = typeof data.confidence === 'number' ? data.confidence : 0;
                 const riskPercent = (confidence * 100).toFixed(1);
                 const modelUsed = data.model_used || 'ensemble';
                 
                 const resultStatus = document.getElementById('resultStatus');
-                const riskScore = document.getElementById('riskScore');
-                const riskFill = document.getElementById('riskFill');
+                const resultConfidence = document.getElementById('resultConfidence');
                 const resultModel = document.getElementById('resultModel');
                 
-                if (isPhishing) {
-                    resultStatus.innerHTML = '❌ PHISHING DETECTED';
+                if (modelUsed === 'invalid') {
+                    resultStatus.innerHTML = '❌ INVALID URL';
+                    resultStatus.className = 'result-status invalid';
+                    resultConfidence.innerHTML = '';
+                    resultModel.innerHTML = 'Please enter a valid URL format (e.g., https://example.com)';
+                } else if (isPhishing) {
+                    resultStatus.innerHTML = '⚠️ PHISHING DETECTED';
                     resultStatus.className = 'result-status phishing';
+                    resultConfidence.innerHTML = `Risk Score: ${riskPercent}%`;
+                    resultModel.innerHTML = `Detected by: ${modelUsed}`;
                 } else {
-                    resultStatus.innerHTML = '✅ SAFE WEBSITE';
+                    resultStatus.innerHTML = '✅ LEGITIMATE WEBSITE';
                     resultStatus.className = 'result-status safe';
+                    resultConfidence.innerHTML = `Confidence: ${(1 - confidence) * 100}% safe`;
+                    resultModel.innerHTML = `Analyzed by: ${modelUsed}`;
                 }
                 
-                riskScore.innerHTML = `${riskPercent}%`;
-                resultModel.innerHTML = `Model: ${modelUsed} | Confidence: ${riskPercent}%`;
-                
-                riskFill.style.width = `${riskPercent}%`;
-                if (riskPercent >= 60) riskFill.className = 'risk-fill high';
-                else if (riskPercent >= 25) riskFill.className = 'risk-fill medium';
-                else riskFill.className = 'risk-fill low';
-                
-                const findings = getFindings(url, isPhishing, confidence);
-                const findingsList = document.getElementById('findingsList');
-                findingsList.innerHTML = findings.map(f => `<div class="finding-item"><div class="finding-icon">${f.icon}</div><div class="finding-text">${f.text}</div></div>`).join('');
-                
-                scanHistory.push({ url: url, isPhishing: isPhishing, confidence: confidence, timestamp: new Date().toISOString() });
-                localStorage.setItem('scanHistory', JSON.stringify(scanHistory));
-                
-                updateStats();
                 resultCard.style.display = 'block';
                 
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error: ' + error.message + '. The service might be waking up. Please try again in 30 seconds.');
+                const resultStatus = document.getElementById('resultStatus');
+                const resultConfidence = document.getElementById('resultConfidence');
+                const resultModel = document.getElementById('resultModel');
+                resultStatus.innerHTML = '❌ ERROR';
+                resultStatus.className = 'result-status invalid';
+                resultConfidence.innerHTML = '';
+                resultModel.innerHTML = 'Service waking up. Please try again in 30 seconds.';
+                resultCard.style.display = 'block';
+            } finally {
+                checkBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+        
+        async function checkURL2() {
+            const url = document.getElementById('urlInput2').value.trim();
+            const checkBtn = document.getElementById('checkBtn2');
+            const loading = document.getElementById('loading2');
+            const resultCard = document.getElementById('resultCard2');
+            
+            if (!url) { alert('Please enter a URL'); return; }
+            
+            checkBtn.disabled = true;
+            loading.style.display = 'block';
+            resultCard.style.display = 'none';
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url, modelType: 'ensemble' })
+                });
+                
+                const data = await response.json();
+                const isPhishing = data.is_phishing === true;
+                const confidence = typeof data.confidence === 'number' ? data.confidence : 0;
+                const riskPercent = (confidence * 100).toFixed(1);
+                const modelUsed = data.model_used || 'ensemble';
+                
+                const resultStatus = document.getElementById('resultStatus2');
+                const resultConfidence = document.getElementById('resultConfidence2');
+                const resultModel = document.getElementById('resultModel2');
+                
+                if (modelUsed === 'invalid') {
+                    resultStatus.innerHTML = '❌ INVALID URL';
+                    resultStatus.className = 'result-status invalid';
+                    resultConfidence.innerHTML = '';
+                    resultModel.innerHTML = 'Please enter a valid URL format (e.g., https://example.com)';
+                } else if (isPhishing) {
+                    resultStatus.innerHTML = '⚠️ PHISHING DETECTED';
+                    resultStatus.className = 'result-status phishing';
+                    resultConfidence.innerHTML = `Risk Score: ${riskPercent}%`;
+                    resultModel.innerHTML = `Detected by: ${modelUsed}`;
+                } else {
+                    resultStatus.innerHTML = '✅ LEGITIMATE WEBSITE';
+                    resultStatus.className = 'result-status safe';
+                    resultConfidence.innerHTML = `Confidence: ${(1 - confidence) * 100}% safe`;
+                    resultModel.innerHTML = `Analyzed by: ${modelUsed}`;
+                }
+                
+                resultCard.style.display = 'block';
+                
+            } catch (error) {
+                const resultStatus = document.getElementById('resultStatus2');
+                const resultConfidence = document.getElementById('resultConfidence2');
+                const resultModel = document.getElementById('resultModel2');
+                resultStatus.innerHTML = '❌ ERROR';
+                resultStatus.className = 'result-status invalid';
+                resultConfidence.innerHTML = '';
+                resultModel.innerHTML = 'Service waking up. Please try again in 30 seconds.';
+                resultCard.style.display = 'block';
             } finally {
                 checkBtn.disabled = false;
                 loading.style.display = 'none';
@@ -528,7 +614,10 @@
         document.getElementById('checkBtn').addEventListener('click', checkURL);
         document.getElementById('urlInput').addEventListener('keypress', function(e) { if (e.key === 'Enter') checkURL(); });
         
-        updateStats();
+        if (document.getElementById('checkBtn2')) {
+            document.getElementById('checkBtn2').addEventListener('click', checkURL2);
+            document.getElementById('urlInput2').addEventListener('keypress', function(e) { if (e.key === 'Enter') checkURL2(); });
+        }
     </script>
 </body>
 </html>
