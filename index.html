@@ -153,15 +153,11 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 <div class="modal-content">
 <h2 id="modalTitle">Sign Up</h2>
 <div id="signupForm">
-<input type="text" id="signupEmail" placeholder="Email or Mobile Number">
+<input type="text" id="signupEmail" placeholder="Email">
 <input type="text" id="signupUsername" placeholder="Username">
 <input type="password" id="signupPassword" placeholder="Password">
 <input type="password" id="signupConfirmPassword" placeholder="Confirm Password">
-<button onclick="sendOTP()">Sign Up & Send OTP</button>
-</div>
-<div id="otpForm" style="display:none">
-<input type="text" id="otpCode" placeholder="Enter OTP">
-<button onclick="verifyOTP()">Verify OTP & Create Account</button>
+<button onclick="signup()">Sign Up</button>
 </div>
 <div id="loginForm" style="display:none">
 <input type="text" id="loginEmail" placeholder="Email or Username">
@@ -175,8 +171,8 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 
 <script>
 const API_URL = 'https://phishing-java-api.onrender.com/api/phishing/predict';
+const AUTH_URL = 'https://phishing-java-api.onrender.com/api/auth';
 let currentAuthMode = 'signup';
-let pendingUser = null;
 let currentUser = JSON.parse(localStorage.getItem('phishguard_user') || 'null');
 
 function updateAuthUI() {
@@ -195,7 +191,6 @@ function openModal(mode) {
     document.getElementById('modalTitle').innerText = mode === 'signup' ? 'Sign Up' : 'Login';
     document.getElementById('signupForm').style.display = mode === 'signup' ? 'block' : 'none';
     document.getElementById('loginForm').style.display = mode === 'login' ? 'block' : 'none';
-    document.getElementById('otpForm').style.display = 'none';
     document.getElementById('switchLink').innerText = mode === 'signup' ? 'Already have an account? Login' : "Don't have an account? Sign Up";
     document.getElementById('authModal').style.display = 'flex';
 }
@@ -208,7 +203,7 @@ function toggleAuthMode() {
     openModal(currentAuthMode === 'signup' ? 'login' : 'signup');
 }
 
-function sendOTP() {
+async function signup() {
     const email = document.getElementById('signupEmail').value;
     const username = document.getElementById('signupUsername').value;
     const password = document.getElementById('signupPassword').value;
@@ -223,30 +218,31 @@ function sendOTP() {
         return;
     }
     
-    pendingUser = { email, username, password };
-    const demoOTP = Math.floor(100000 + Math.random() * 900000);
-    alert(`Demo OTP: ${demoOTP}\n\nIn production, this would be sent to ${email}`);
-    
-    document.getElementById('signupForm').style.display = 'none';
-    document.getElementById('otpForm').style.display = 'block';
-}
-
-function verifyOTP() {
-    const otp = document.getElementById('otpCode').value;
-    if (!otp) {
-        alert('Please enter OTP');
-        return;
+    try {
+        const response = await fetch(`${AUTH_URL}/signup`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, username, password })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('Account created successfully! Please login.');
+            openModal('login');
+            document.getElementById('signupEmail').value = '';
+            document.getElementById('signupUsername').value = '';
+            document.getElementById('signupPassword').value = '';
+            document.getElementById('signupConfirmPassword').value = '';
+        } else {
+            alert(data.message || 'Signup failed');
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
     }
-    
-    alert('OTP Verified Successfully! Account created.');
-    currentUser = { username: pendingUser.username, email: pendingUser.email };
-    localStorage.setItem('phishguard_user', JSON.stringify(currentUser));
-    updateAuthUI();
-    closeModal();
-    pendingUser = null;
 }
 
-function login() {
+async function login() {
     const email = document.getElementById('loginEmail').value;
     const password = document.getElementById('loginPassword').value;
     
@@ -255,12 +251,29 @@ function login() {
         return;
     }
     
-    // For demo, accept any credentials
-    currentUser = { username: email.split('@')[0], email: email };
-    localStorage.setItem('phishguard_user', JSON.stringify(currentUser));
-    updateAuthUI();
-    closeModal();
-    alert('Login successful!');
+    try {
+        const response = await fetch(`${AUTH_URL}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            currentUser = { username: data.username, email: data.email };
+            localStorage.setItem('phishguard_user', JSON.stringify(currentUser));
+            updateAuthUI();
+            closeModal();
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            alert('Login successful!');
+        } else {
+            alert(data.message || 'Login failed');
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
 }
 
 function logout() {
@@ -295,7 +308,6 @@ async function checkURL() {
     loading.style.display = 'block';
     resultCard.style.display = 'none';
     
-    // Set timeout for 90 seconds (Render cold start can take up to 60 seconds)
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 90000);
     
