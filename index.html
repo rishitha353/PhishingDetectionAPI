@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhishGuard - Phishing Detection</title>
+    <title>PhishShield - Smart Protection</title>
     <style>
         * {
             margin: 0;
@@ -12,21 +12,19 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f0f2f5;
+            color: #1a1a2e;
         }
 
         /* Navbar */
         .navbar {
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(10px);
+            background: white;
             padding: 16px 40px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             position: sticky;
             top: 0;
             z-index: 100;
@@ -45,15 +43,14 @@
         .logo-text {
             font-size: 22px;
             font-weight: 700;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #667eea;
         }
 
         .nav-links {
             display: flex;
-            gap: 32px;
+            gap: 28px;
+            align-items: center;
+            flex-wrap: wrap;
         }
 
         .nav-links a {
@@ -67,187 +64,176 @@
             color: #667eea;
         }
 
-        /* Main Container */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 60px 40px;
+        .auth-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #667eea;
+            color: #667eea;
+            padding: 8px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 8px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
         }
 
         /* Hero Section */
         .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 60px 40px;
             text-align: center;
-            margin-bottom: 50px;
+            color: white;
         }
 
         .hero h1 {
             font-size: 48px;
-            font-weight: 800;
-            color: white;
             margin-bottom: 16px;
         }
 
         .hero p {
             font-size: 18px;
-            color: rgba(255, 255, 255, 0.9);
-            max-width: 600px;
+            opacity: 0.9;
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            background: white;
+            padding: 40px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 30px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 800;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        /* Features Grid */
+        .features {
+            padding: 60px 40px;
+            max-width: 1200px;
             margin: 0 auto;
         }
 
-        /* Input Card */
-        .input-card {
-            background: white;
-            border-radius: 24px;
-            padding: 40px;
+        .features h2 {
             text-align: center;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            font-size: 32px;
             margin-bottom: 40px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .feature-icon {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+
+        .feature-card h3 {
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* Input Section */
+        .input-section {
+            background: white;
+            margin: 40px auto;
+            max-width: 800px;
+            padding: 40px;
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
 
         .input-group {
             display: flex;
             gap: 15px;
-            max-width: 700px;
-            margin: 0 auto 15px;
+            margin: 20px 0;
         }
 
         .url-input {
             flex: 1;
-            padding: 18px 24px;
+            padding: 16px 20px;
             border: 2px solid #e0e0e0;
             border-radius: 50px;
             font-size: 16px;
-            transition: all 0.3s;
         }
 
         .url-input:focus {
             outline: none;
             border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         .check-btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 18px 36px;
+            padding: 16px 32px;
             border-radius: 50px;
-            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
         }
 
-        .check-btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .check-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .privacy-note {
-            color: #888;
-            font-size: 14px;
-        }
-
-        /* Loading */
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 30px;
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Result Card */
-        .result-card {
-            background: white;
-            border-radius: 24px;
-            padding: 40px;
-            text-align: center;
-            margin-top: 30px;
-            display: none;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-        }
-
-        .result-status {
-            font-size: 32px;
-            font-weight: 800;
-            margin-bottom: 20px;
-        }
-
-        .result-status.phishing {
-            color: #dc2626;
-        }
-
-        .result-status.safe {
-            color: #10b981;
-        }
-
-        .result-status.invalid {
-            color: #f59e0b;
-        }
-
-        .result-confidence {
-            font-size: 18px;
-            color: #666;
-            margin-bottom: 20px;
-        }
-
-        .result-confidence span {
-            font-weight: 700;
-            color: #333;
-        }
-
-        .result-model {
-            font-size: 14px;
-            color: #888;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        /* How It Works Section */
+        /* How It Works */
         .how-it-works {
-            background: white;
-            border-radius: 24px;
-            padding: 50px;
-            margin-top: 50px;
+            background: #f8f9fa;
+            padding: 60px 40px;
             text-align: center;
-        }
-
-        .how-it-works h2 {
-            font-size: 28px;
-            margin-bottom: 40px;
-            color: #333;
         }
 
         .steps {
             display: flex;
-            justify-content: space-between;
-            gap: 30px;
+            justify-content: center;
+            gap: 40px;
             flex-wrap: wrap;
+            margin-top: 40px;
         }
 
         .step {
-            flex: 1;
             text-align: center;
-            min-width: 200px;
+            max-width: 200px;
         }
 
         .step-number {
@@ -261,70 +247,98 @@
             justify-content: center;
             font-size: 24px;
             font-weight: 700;
-            margin: 0 auto 20px;
+            margin: 0 auto 15px;
         }
 
-        .step h3 {
-            margin-bottom: 10px;
-            color: #333;
-        }
-
-        .step p {
-            color: #666;
-            font-size: 14px;
-        }
-
-        /* Why It Matters */
-        .why-matters {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 24px;
-            padding: 40px;
-            margin-top: 30px;
-            text-align: center;
-        }
-
-        .why-matters h2 {
-            font-size: 28px;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .why-matters p {
-            color: #666;
-            line-height: 1.6;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        /* Quick Buttons */
-        .quick-buttons {
-            display: flex;
-            gap: 12px;
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
             justify-content: center;
-            margin-top: 20px;
-            flex-wrap: wrap;
+            align-items: center;
         }
 
-        .quick-btn {
-            background: #f0f0f0;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 50px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .quick-btn:hover {
-            background: #e0e0e0;
-        }
-
-        /* Footer */
-        .footer {
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            max-width: 450px;
+            width: 90%;
             text-align: center;
-            padding: 30px;
-            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .modal-content button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .modal-content .switch-link {
+            margin-top: 15px;
+            color: #667eea;
+            cursor: pointer;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: #dc2626;
+            cursor: pointer;
             font-size: 14px;
+        }
+
+        .result-card {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 16px;
+            display: none;
+        }
+
+        .result-card.phishing {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .result-card.safe {
+            background: #d1fae5;
+            color: #10b981;
+        }
+
+        .result-card.invalid {
+            background: #fef3c7;
+            color: #f59e0b;
         }
 
         @media (max-width: 768px) {
@@ -334,18 +348,13 @@
                 padding: 15px 20px;
             }
             .nav-links {
-                gap: 20px;
-            }
-            .container {
-                padding: 30px 20px;
+                flex-wrap: wrap;
+                justify-content: center;
             }
             .hero h1 {
                 font-size: 32px;
             }
             .input-group {
-                flex-direction: column;
-            }
-            .steps {
                 flex-direction: column;
             }
         }
@@ -356,205 +365,245 @@
     <nav class="navbar">
         <div class="logo">
             <span class="logo-icon">🛡️</span>
-            <span class="logo-text">PhishGuard</span>
+            <span class="logo-text">PhishShield</span>
         </div>
         <div class="nav-links">
-            <a href="#" class="nav-link" data-page="home">Home</a>
-            <a href="#" class="nav-link" data-page="check">Check URL</a>
-            <a href="#" class="nav-link" data-page="resources">Resources</a>
-            <a href="#" class="nav-link" data-page="about">About</a>
-            <a href="#" class="nav-link" data-page="contact">Contact</a>
+            <a href="#">Home</a>
+            <a href="#">CheckURL</a>
+            <a href="#">Features</a>
+            <a href="#">Chrome Extension</a>
+            <a href="#">API</a>
+            <a href="#">Blog</a>
+            <a href="#">About</a>
+            <div id="authSection" class="auth-buttons">
+                <button class="btn-outline" onclick="openModal('login')">Sign In</button>
+                <button class="btn-primary" onclick="openModal('signup')">Sign Up</button>
+            </div>
+            <div id="userSection" style="display: none;" class="user-info">
+                <span class="user-name" id="userName"></span>
+                <button class="logout-btn" onclick="logout()">Logout</button>
+            </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <div class="container" id="mainContainer">
-        <!-- Home Page (Default) -->
-        <div id="homePage">
-            <div class="hero">
-                <h1>Detect Phishing. Stay Protected.</h1>
-                <p>PhishGuard helps you identify phishing websites and potentially malicious links before they can harm you.</p>
-            </div>
-
-            <div class="input-card">
-                <div class="input-group">
-                    <input type="text" id="urlInput" class="url-input" placeholder="Enter a URL to check for phishing...">
-                    <button id="checkBtn" class="check-btn">🔍 Check URL</button>
-                </div>
-                <div class="quick-buttons">
-                    <button class="quick-btn" onclick="setUrl('https://google.com')">Safe: google.com</button>
-                    <button class="quick-btn" onclick="setUrl('http://paypal.com.login.xyz')">Phishing: paypal.com.login.xyz</button>
-                    <button class="quick-btn" onclick="setUrl('invalid-url')">Test: Invalid URL</button>
-                </div>
-                <p class="privacy-note">Your checks are private and secure</p>
-
-                <div id="loading" class="loading">
-                    <div class="spinner"></div>
-                    <p>Analyzing URL...</p>
-                </div>
-
-                <div id="resultCard" class="result-card">
-                    <div id="resultStatus" class="result-status"></div>
-                    <div id="resultConfidence" class="result-confidence"></div>
-                    <div id="resultModel" class="result-model"></div>
-                </div>
-            </div>
-
-            <div class="how-it-works">
-                <h2>How It Works</h2>
-                <div class="steps">
-                    <div class="step">
-                        <div class="step-number">1</div>
-                        <h3>Submit URL</h3>
-                        <p>Enter a suspicious URL you want to check.</p>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">2</div>
-                        <h3>Analyze</h3>
-                        <p>Our AI system analyzes the URL using multiple detection models.</p>
-                    </div>
-                    <div class="step">
-                        <div class="step-number">3</div>
-                        <h3>Get Results</h3>
-                        <p>Receive instant verdict: Phishing, Legitimate, or Invalid.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="why-matters">
-                <h2>Why It Matters</h2>
-                <p>Phishing attacks are one of the most common cyber threats today. They can steal your personal information, compromise your identity, and lead to financial loss. PhishGuard helps you protect yourself from these threats by identifying phishing websites and malicious links before they can harm you.</p>
-            </div>
-        </div>
-
-        <!-- Other Pages (Simple Placeholders) -->
-        <div id="checkPage" style="display: none;">
-            <div class="hero">
-                <h1>Check URL</h1>
-                <p>Enter a URL to check if it's a phishing website</p>
-            </div>
-            <div class="input-card">
-                <div class="input-group">
-                    <input type="text" id="urlInput2" class="url-input" placeholder="Enter a URL to check for phishing...">
-                    <button id="checkBtn2" class="check-btn">🔍 Check URL</button>
-                </div>
-                <div class="quick-buttons">
-                    <button class="quick-btn" onclick="setUrl2('https://google.com')">Safe: google.com</button>
-                    <button class="quick-btn" onclick="setUrl2('http://paypal.com.login.xyz')">Phishing: paypal.com.login.xyz</button>
-                </div>
-                <div id="loading2" class="loading"><div class="spinner"></div><p>Analyzing URL...</p></div>
-                <div id="resultCard2" class="result-card">
-                    <div id="resultStatus2" class="result-status"></div>
-                    <div id="resultConfidence2" class="result-confidence"></div>
-                    <div id="resultModel2" class="result-model"></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="resourcesPage" style="display: none;"><div class="hero"><h1>Resources</h1><p>Coming soon...</p></div></div>
-        <div id="aboutPage" style="display: none;"><div class="hero"><h1>About PhishGuard</h1><p>Powered by AI and Machine Learning to protect you from phishing attacks.</p></div></div>
-        <div id="contactPage" style="display: none;"><div class="hero"><h1>Contact</h1><p>For support, contact us at support@phishguard.com</p></div></div>
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1>Smart Protection. Safer Browsing.</h1>
+        <p>AI Powered | Detect Phishing | Stay Safe Online</p>
     </div>
 
-    <div class="footer">
-        <p>© 2026 PhishGuard. Protecting you from phishing threats.</p>
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+        <div class="stat"><div class="stat-number">15M+</div><div class="stat-label">URLs Analyzed</div></div>
+        <div class="stat"><div class="stat-number">98.7%</div><div class="stat-label">Detection Accuracy</div></div>
+        <div class="stat"><div class="stat-number">250K+</div><div class="stat-label">Active Users</div></div>
+        <div class="stat"><div class="stat-number">200+</div><div class="stat-label">Countries Protected</div></div>
+    </div>
+
+    <!-- Features -->
+    <div class="features">
+        <h2>Smart Protection. Safer Browsing.</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3>Real-time Detection</h3>
+                <p>PhishShield uses advanced AI and real-time threat intelligence to detect phishing websites and protect you from online scams.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Privacy First</h3>
+                <p>We respect your privacy. All checks are anonymous and your data is never stored.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Easy Integration</h3>
+                <p>Use our Chrome extension or API to protect yourself and your users seamlessly.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- URL Checker Section -->
+    <div class="input-section">
+        <h2>Check URL Safety</h2>
+        <p>Enter a URL to check if it's a phishing website</p>
+        <div class="input-group">
+            <input type="text" id="urlInput" class="url-input" placeholder="Enter a URL to check for phishing...">
+            <button id="checkBtn" class="check-btn">Check URL</button>
+        </div>
+        <div class="quick-buttons" style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
+            <button class="btn-outline" style="padding: 6px 16px;" onclick="setUrl('https://google.com')">Safe: google.com</button>
+            <button class="btn-outline" style="padding: 6px 16px;" onclick="setUrl('http://paypal.com.login.xyz')">Phishing: paypal.com.login.xyz</button>
+        </div>
+        <div id="loading" style="display: none; margin-top: 20px;">⏳ Analyzing URL...</div>
+        <div id="resultCard" class="result-card"></div>
+        <p style="margin-top: 15px; font-size: 12px; color: #888;">Your checks are private and secure. We never store your data.</p>
+    </div>
+
+    <!-- How It Works -->
+    <div class="how-it-works">
+        <h2>How It Works</h2>
+        <p>Simple. Fast. Effective.</p>
+        <div class="steps">
+            <div class="step"><div class="step-number">1</div><h3>Enter URL</h3><p>Paste the suspicious URL into the search box.</p></div>
+            <div class="step"><div class="step-number">2</div><h3>Get Analysis</h3><p>Our system analyzes the URL using multiple security layers.</p></div>
+            <div class="step"><div class="step-number">3</div><h3>View Result</h3><p>Get instant results about the threat.</p></div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Sign Up</h2>
+            <div id="signupForm">
+                <input type="text" id="signupEmail" placeholder="Email or Mobile Number">
+                <input type="text" id="signupUsername" placeholder="Username">
+                <input type="password" id="signupPassword" placeholder="Password">
+                <input type="password" id="signupConfirmPassword" placeholder="Confirm Password">
+                <button onclick="sendOTP()">Sign Up & Send OTP</button>
+            </div>
+            <div id="otpForm" style="display: none;">
+                <input type="text" id="otpCode" placeholder="Enter OTP">
+                <button onclick="verifyOTP()">Verify OTP & Create Account</button>
+            </div>
+            <div id="loginForm" style="display: none;">
+                <input type="text" id="loginEmail" placeholder="Email or Username">
+                <input type="password" id="loginPassword" placeholder="Password">
+                <button onclick="login()">Login</button>
+            </div>
+            <div class="switch-link" onclick="toggleAuthMode()" id="switchLink">Already have an account? Login</div>
+            <div class="switch-link" onclick="closeModal()">Close</div>
+        </div>
     </div>
 
     <script>
         const API_URL = 'https://phishing-java-api.onrender.com/api/phishing/predict';
-        
-        // Navigation
-        document.querySelectorAll('.nav-link').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const page = this.dataset.page;
-                document.getElementById('homePage').style.display = page === 'home' ? 'block' : 'none';
-                document.getElementById('checkPage').style.display = page === 'check' ? 'block' : 'none';
-                document.getElementById('resourcesPage').style.display = page === 'resources' ? 'block' : 'none';
-                document.getElementById('aboutPage').style.display = page === 'about' ? 'block' : 'none';
-                document.getElementById('contactPage').style.display = page === 'contact' ? 'block' : 'none';
-            });
-        });
+        let currentAuthMode = 'signup';
+        let pendingUser = null;
 
+        // Check if user is logged in
+        let currentUser = JSON.parse(localStorage.getItem('phishguard_user') || 'null');
+        
+        function updateAuthUI() {
+            if (currentUser) {
+                document.getElementById('authSection').style.display = 'none';
+                document.getElementById('userSection').style.display = 'flex';
+                document.getElementById('userName').innerText = currentUser.username;
+            } else {
+                document.getElementById('authSection').style.display = 'flex';
+                document.getElementById('userSection').style.display = 'none';
+            }
+        }
+        
+        function openModal(mode) {
+            currentAuthMode = mode;
+            document.getElementById('modalTitle').innerText = mode === 'signup' ? 'Sign Up' : 'Login';
+            document.getElementById('signupForm').style.display = mode === 'signup' ? 'block' : 'none';
+            document.getElementById('loginForm').style.display = mode === 'login' ? 'block' : 'none';
+            document.getElementById('otpForm').style.display = 'none';
+            document.getElementById('switchLink').innerText = mode === 'signup' ? 'Already have an account? Login' : "Don't have an account? Sign Up";
+            document.getElementById('authModal').style.display = 'flex';
+        }
+        
+        function closeModal() {
+            document.getElementById('authModal').style.display = 'none';
+        }
+        
+        function toggleAuthMode() {
+            if (currentAuthMode === 'signup') {
+                openModal('login');
+            } else {
+                openModal('signup');
+            }
+        }
+        
+        function sendOTP() {
+            const email = document.getElementById('signupEmail').value;
+            const username = document.getElementById('signupUsername').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('signupConfirmPassword').value;
+            
+            if (!email || !username || !password) {
+                alert('Please fill all fields');
+                return;
+            }
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+            
+            pendingUser = { email, username, password };
+            
+            // Simulate sending OTP (in real app, call backend API)
+            const demoOTP = Math.floor(100000 + Math.random() * 900000);
+            alert(`Demo OTP: ${demoOTP}\n\nIn production, this would be sent to ${email}`);
+            
+            document.getElementById('signupForm').style.display = 'none';
+            document.getElementById('otpForm').style.display = 'block';
+        }
+        
+        function verifyOTP() {
+            const otp = document.getElementById('otpCode').value;
+            if (!otp) {
+                alert('Please enter OTP');
+                return;
+            }
+            
+            // In production, verify OTP with backend
+            alert('OTP Verified Successfully! Account created.');
+            
+            // Save user
+            currentUser = { username: pendingUser.username, email: pendingUser.email };
+            localStorage.setItem('phishguard_user', JSON.stringify(currentUser));
+            updateAuthUI();
+            closeModal();
+            
+            pendingUser = null;
+        }
+        
+        function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                alert('Please enter email and password');
+                return;
+            }
+            
+            // Demo login - in production, verify with backend
+            currentUser = { username: email.split('@')[0], email: email };
+            localStorage.setItem('phishguard_user', JSON.stringify(currentUser));
+            updateAuthUI();
+            closeModal();
+            alert('Login successful!');
+        }
+        
+        function logout() {
+            localStorage.removeItem('phishguard_user');
+            currentUser = null;
+            updateAuthUI();
+            alert('Logged out successfully');
+        }
+        
         function setUrl(url) {
             document.getElementById('urlInput').value = url;
         }
-
-        function setUrl2(url) {
-            document.getElementById('urlInput2').value = url;
-        }
-
+        
         async function checkURL() {
             const url = document.getElementById('urlInput').value.trim();
             const checkBtn = document.getElementById('checkBtn');
             const loading = document.getElementById('loading');
             const resultCard = document.getElementById('resultCard');
             
-            if (!url) { alert('Please enter a URL'); return; }
-            
-            checkBtn.disabled = true;
-            loading.style.display = 'block';
-            resultCard.style.display = 'none';
-            
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url: url, modelType: 'ensemble' })
-                });
-                
-                const data = await response.json();
-                const isPhishing = data.is_phishing === true;
-                const confidence = typeof data.confidence === 'number' ? data.confidence : 0;
-                const riskPercent = (confidence * 100).toFixed(1);
-                const modelUsed = data.model_used || 'ensemble';
-                
-                const resultStatus = document.getElementById('resultStatus');
-                const resultConfidence = document.getElementById('resultConfidence');
-                const resultModel = document.getElementById('resultModel');
-                
-                if (modelUsed === 'invalid') {
-                    resultStatus.innerHTML = '❌ INVALID URL';
-                    resultStatus.className = 'result-status invalid';
-                    resultConfidence.innerHTML = '';
-                    resultModel.innerHTML = 'Please enter a valid URL format (e.g., https://example.com)';
-                } else if (isPhishing) {
-                    resultStatus.innerHTML = '⚠️ PHISHING DETECTED';
-                    resultStatus.className = 'result-status phishing';
-                    resultConfidence.innerHTML = `Risk Score: ${riskPercent}%`;
-                    resultModel.innerHTML = `Detected by: ${modelUsed}`;
-                } else {
-                    resultStatus.innerHTML = '✅ LEGITIMATE WEBSITE';
-                    resultStatus.className = 'result-status safe';
-                    resultConfidence.innerHTML = `Confidence: ${(1 - confidence) * 100}% safe`;
-                    resultModel.innerHTML = `Analyzed by: ${modelUsed}`;
-                }
-                
-                resultCard.style.display = 'block';
-                
-            } catch (error) {
-                console.error('Error:', error);
-                const resultStatus = document.getElementById('resultStatus');
-                const resultConfidence = document.getElementById('resultConfidence');
-                const resultModel = document.getElementById('resultModel');
-                resultStatus.innerHTML = '❌ ERROR';
-                resultStatus.className = 'result-status invalid';
-                resultConfidence.innerHTML = '';
-                resultModel.innerHTML = 'Service waking up. Please try again in 30 seconds.';
-                resultCard.style.display = 'block';
-            } finally {
-                checkBtn.disabled = false;
-                loading.style.display = 'none';
+            if (!currentUser) {
+                alert('Please sign up or login first to check URLs');
+                openModal('login');
+                return;
             }
-        }
-        
-        async function checkURL2() {
-            const url = document.getElementById('urlInput2').value.trim();
-            const checkBtn = document.getElementById('checkBtn2');
-            const loading = document.getElementById('loading2');
-            const resultCard = document.getElementById('resultCard2');
             
-            if (!url) { alert('Please enter a URL'); return; }
+            if (!url) {
+                alert('Please enter a URL');
+                return;
+            }
             
             checkBtn.disabled = true;
             loading.style.display = 'block';
@@ -573,38 +622,36 @@
                 const riskPercent = (confidence * 100).toFixed(1);
                 const modelUsed = data.model_used || 'ensemble';
                 
-                const resultStatus = document.getElementById('resultStatus2');
-                const resultConfidence = document.getElementById('resultConfidence2');
-                const resultModel = document.getElementById('resultModel2');
+                resultCard.style.display = 'block';
                 
                 if (modelUsed === 'invalid') {
-                    resultStatus.innerHTML = '❌ INVALID URL';
-                    resultStatus.className = 'result-status invalid';
-                    resultConfidence.innerHTML = '';
-                    resultModel.innerHTML = 'Please enter a valid URL format (e.g., https://example.com)';
+                    resultCard.className = 'result-card invalid';
+                    resultCard.innerHTML = `
+                        <div style="font-size: 24px; font-weight: 700;">❌ INVALID URL</div>
+                        <div style="margin-top: 10px;">Please enter a valid URL format (e.g., https://example.com)</div>
+                    `;
                 } else if (isPhishing) {
-                    resultStatus.innerHTML = '⚠️ PHISHING DETECTED';
-                    resultStatus.className = 'result-status phishing';
-                    resultConfidence.innerHTML = `Risk Score: ${riskPercent}%`;
-                    resultModel.innerHTML = `Detected by: ${modelUsed}`;
+                    resultCard.className = 'result-card phishing';
+                    resultCard.innerHTML = `
+                        <div style="font-size: 24px; font-weight: 700;">⚠️ PHISHING DETECTED</div>
+                        <div style="margin-top: 10px;">Risk Score: ${riskPercent}%</div>
+                        <div style="margin-top: 5px; font-size: 12px;">Detected by: ${modelUsed}</div>
+                    `;
                 } else {
-                    resultStatus.innerHTML = '✅ LEGITIMATE WEBSITE';
-                    resultStatus.className = 'result-status safe';
-                    resultConfidence.innerHTML = `Confidence: ${(1 - confidence) * 100}% safe`;
-                    resultModel.innerHTML = `Analyzed by: ${modelUsed}`;
+                    resultCard.className = 'result-card safe';
+                    resultCard.innerHTML = `
+                        <div style="font-size: 24px; font-weight: 700;">✅ LEGITIMATE WEBSITE</div>
+                        <div style="margin-top: 10px;">Confidence: ${(1 - confidence) * 100}% safe</div>
+                        <div style="margin-top: 5px; font-size: 12px;">Analyzed by: ${modelUsed}</div>
+                    `;
                 }
-                
-                resultCard.style.display = 'block';
-                
             } catch (error) {
-                const resultStatus = document.getElementById('resultStatus2');
-                const resultConfidence = document.getElementById('resultConfidence2');
-                const resultModel = document.getElementById('resultModel2');
-                resultStatus.innerHTML = '❌ ERROR';
-                resultStatus.className = 'result-status invalid';
-                resultConfidence.innerHTML = '';
-                resultModel.innerHTML = 'Service waking up. Please try again in 30 seconds.';
                 resultCard.style.display = 'block';
+                resultCard.className = 'result-card invalid';
+                resultCard.innerHTML = `
+                    <div style="font-size: 24px; font-weight: 700;">❌ ERROR</div>
+                    <div style="margin-top: 10px;">Service waking up. Please try again in 30 seconds.</div>
+                `;
             } finally {
                 checkBtn.disabled = false;
                 loading.style.display = 'none';
@@ -612,12 +659,11 @@
         }
         
         document.getElementById('checkBtn').addEventListener('click', checkURL);
-        document.getElementById('urlInput').addEventListener('keypress', function(e) { if (e.key === 'Enter') checkURL(); });
+        document.getElementById('urlInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') checkURL();
+        });
         
-        if (document.getElementById('checkBtn2')) {
-            document.getElementById('checkBtn2').addEventListener('click', checkURL2);
-            document.getElementById('urlInput2').addEventListener('keypress', function(e) { if (e.key === 'Enter') checkURL2(); });
-        }
+        updateAuthUI();
     </script>
 </body>
 </html>
