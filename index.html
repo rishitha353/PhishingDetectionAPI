@@ -119,7 +119,7 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 <button class="quick-btn" onclick="setUrl('https://google.com')">Safe: google.com</button>
 <button class="quick-btn" onclick="setUrl('http://paypal.com.login.xyz')">Phishing: paypal.com.login.xyz</button>
 </div>
-<div id="loading" style="display:none; margin-top:15px;">⏳ Analyzing URL...</div>
+<div id="loading" style="display:none; margin-top:15px;">⏳ Analyzing URL... Please wait up to 60 seconds for first request.</div>
 <div id="resultCard" class="result-card"></div>
 </div>
 <div class="hero-right">🛡️</div>
@@ -255,6 +255,7 @@ function login() {
         return;
     }
     
+    // For demo, accept any credentials
     currentUser = { username: email.split('@')[0], email: email };
     localStorage.setItem('phishguard_user', JSON.stringify(currentUser));
     updateAuthUI();
@@ -294,12 +295,23 @@ async function checkURL() {
     loading.style.display = 'block';
     resultCard.style.display = 'none';
     
+    // Set timeout for 90 seconds (Render cold start can take up to 60 seconds)
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 90000);
+    
     try {
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url: url, modelType: 'ensemble' })
+            body: JSON.stringify({ url: url, modelType: 'ensemble' }),
+            signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
         
         const data = await response.json();
         const isPhishing = data.is_phishing === true;
@@ -331,13 +343,25 @@ async function checkURL() {
             `;
         }
     } catch (error) {
+        clearTimeout(timeoutId);
         resultCard.style.display = 'block';
         resultCard.className = 'result-card invalid';
-        resultCard.innerHTML = `
-            <div class="result-status">❌ ERROR</div>
-            <div>Service waking up. Please try again in 30 seconds.</div>
-        `;
+        
+        if (error.name === 'AbortError') {
+            resultCard.innerHTML = `
+                <div class="result-status">⏳ REQUEST TIMEOUT</div>
+                <div>The service is waking up. Please wait 30 seconds and try again.</div>
+                <div class="result-confidence">Note: First request after inactivity takes 30-60 seconds.</div>
+            `;
+        } else {
+            resultCard.innerHTML = `
+                <div class="result-status">🔄 SERVICE STARTING</div>
+                <div>Please wait 30 seconds and click "Check URL" again.</div>
+                <div class="result-confidence">The server is waking up from sleep mode.</div>
+            `;
+        }
     } finally {
+        clearTimeout(timeoutId);
         checkBtn.disabled = false;
         loading.style.display = 'none';
     }
