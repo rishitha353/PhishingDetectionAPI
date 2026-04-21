@@ -20,8 +20,6 @@ public class User {
     @Column(nullable = false)
     private String password;
     
-    private boolean verified = false;
-    
     @Column(name = "created_at")
     private LocalDateTime createdAt;
     
@@ -30,7 +28,6 @@ public class User {
     public String getEmail() { return email; }
     public String getUsername() { return username; }
     public String getPassword() { return password; }
-    public boolean isVerified() { return verified; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     
     // Setters
@@ -38,6 +35,5 @@ public class User {
     public void setEmail(String email) { this.email = email; }
     public void setUsername(String username) { this.username = username; }
     public void setPassword(String password) { this.password = password; }
-    public void setVerified(boolean verified) { this.verified = verified; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

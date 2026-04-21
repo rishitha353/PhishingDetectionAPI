@@ -16,8 +16,8 @@ public class EmailService {
     public void sendOtpEmail(String to, String otp) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(to);
-        message.setSubject("PhishShield - Email Verification OTP");
-        message.setText("Your OTP for PhishShield email verification is: " + otp + "\n\nThis OTP is valid for 5 minutes.\n\nThank you for using PhishShield!");
+        message.setSubject("PhishShield - Your OTP Code");
+        message.setText("Your OTP for PhishShield verification is: " + otp + "\n\nThis OTP is valid for 5 minutes.\n\nThank you for using PhishShield!");
         mailSender.send(message);
         System.out.println("OTP email sent to: " + to);
     }
