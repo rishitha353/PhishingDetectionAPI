@@ -1,257 +1,196 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from pydantic import BaseModel
-import joblib
 import uvicorn
-import numpy as np
-import tensorflow as tf
 import re
-from typing import Dict, Any
 from urllib.parse import urlparse
 
 app = FastAPI()
 
-# ---------- load models ----------
-rf_model = joblib.load("models/rf_model.pkl")
-svm_model = joblib.load("models/svm_model.pkl")
-xgb_model = joblib.load("models/xgb_model.pkl")
-cnn_model = tf.keras.models.load_model("models/cnn_model.h5")
-
-print("✅ All models loaded successfully")
-
-# ---------- TRUSTED DOMAINS (100% SAFE - Force confidence to 0.99) ----------
-TRUSTED_DOMAINS = [
-    'google.com', 'youtube.com', 'facebook.com', 'amazon.com',
-    'microsoft.com', 'apple.com', 'github.com', 'stackoverflow.com',
-    'netflix.com', 'twitter.com', 'instagram.com', 'linkedin.com',
-    'reddit.com', 'wikipedia.org', 'spotify.com', 'whatsapp.com',
-    'telegram.org', 'cloudflare.com', 'medium.com', 'quora.com',
-    'yahoo.com', 'bing.com', 'duckduckgo.com', 'paypal.com',
-    'onrender.com', 'render.com', 'localhost', '127.0.0.1'
+# ========== TRUSTED LEGITIMATE DOMAINS ==========
+LEGITIMATE_DOMAINS = [
+    # Tech & Search
+    'google.com', 'youtube.com', 'gmail.com', 'drive.google.com',
+    'github.com', 'stackoverflow.com', 'gitlab.com', 'bitbucket.org',
+    'microsoft.com', 'apple.com', 'amazon.com', 'netflix.com',
+    'twitter.com', 'facebook.com', 'instagram.com', 'linkedin.com',
+    'reddit.com', 'quora.com', 'medium.com', 'wikipedia.org',
+    'spotify.com', 'whatsapp.com', 'telegram.org', 'discord.com',
+    'cloudflare.com', 'digitalocean.com', 'render.com', 'vercel.com',
+    
+    # News & Media
+    'cnn.com', 'bbc.com', 'nytimes.com', 'wsj.com', 'bloomberg.com',
+    'reuters.com', 'forbes.com', 'techcrunch.com', 'theverge.com',
+    'wired.com', 'arstechnica.com', 'zdnet.com',
+    
+    # Shopping
+    'ebay.com', 'walmart.com', 'target.com', 'bestbuy.com',
+    'etsy.com', 'shopify.com', 'aliexpress.com',
+    
+    # Banking & Finance (safe ones)
+    'paypal.com', 'stripe.com', 'square.com', 'chase.com',
+    'bankofamerica.com', 'wellsfargo.com', 'citi.com',
+    
+    # Education
+    'udemy.com', 'coursera.org', 'edx.org', 'khanacademy.org',
+    
+    # Entertainment
+    'twitch.tv', 'hulu.com', 'disneyplus.com', 'hbomax.com',
+    'primevideo.com', 'peacocktv.com',
+    
+    # Other common legitimate
+    'dropbox.com', 'box.com', 'onedrive.live.com', 'icloud.com',
+    'adobe.com', 'salesforce.com', 'atlassian.com', 'slack.com'
 ]
 
-# ---------- COMMON TYPO PATTERNS (PHISHING) ----------
-TYPO_PATTERNS = [
-    (r'goo+gle', 'google.com'),
-    (r'youtu+be', 'youtube.com'),
-    (r'fac+book', 'facebook.com'),
-    (r'ama+zon', 'amazon.com'),
-    (r'micro+soft', 'microsoft.com'),
-    (r'link+din', 'linkedin.com'),
-    (r'insta+gram', 'instagram.com'),
-    (r'twit+ter', 'twitter.com'),
+# ========== SUSPICIOUS PATTERNS (Phishing) ==========
+SUSPICIOUS_KEYWORDS = [
+    'login', 'verify', 'update', 'secure', 'confirm', 'signin',
+    'account', 'alert', 'warning', 'validate', 'authenticate',
+    'security', 'important', 'notice', 'billing', 'payment'
 ]
 
-def is_trusted_domain(url: str) -> tuple:
-    """Check if URL belongs to trusted domain - returns (is_trusted, confidence)"""
+SUSPICIOUS_TLDS = ['.xyz', '.top', '.club', '.online', '.site', '.website', '.info', '.click', '.download', '.work']
+
+def extract_domain(url: str) -> str:
+    """Extract domain from URL"""
     try:
+        if '://' not in url:
+            url = 'http://' + url
         parsed = urlparse(url)
         domain = parsed.netloc.lower()
         if domain.startswith('www.'):
             domain = domain[4:]
-        
-        # Exact match
-        for trusted in TRUSTED_DOMAINS:
-            if domain == trusted or domain.endswith('.' + trusted):
-                return True, 0.99
-        
-        # Check for typos
-        for pattern, correct in TYPO_PATTERNS:
-            if re.search(pattern, domain):
-                return False, 0.95  # Typo - likely phishing
-        
-        return False, None
-    except Exception:
-        return False, None
+        # Remove port if present
+        if ':' in domain:
+            domain = domain.split(':')[0]
+        return domain
+    except:
+        return url.lower()
 
-def is_valid_url_format(url: str) -> bool:
-    """Check if URL has valid format"""
-    if ',' in url or ' ' in url:
-        return False
+def is_legitimate_typo(domain: str) -> bool:
+    """Check if domain is a typo of a legitimate domain (phishing)"""
+    for legit in LEGITIMATE_DOMAINS:
+        # Check if the typo is very similar to a legitimate domain
+        legit_part = legit.split('.')[0]
+        domain_part = domain.split('.')[0]
+        
+        # Common typos
+        if len(domain_part) > 3 and len(legit_part) > 3:
+            # If most characters match but not exact (e.g., gooogle vs google)
+            matches = sum(1 for a, b in zip(domain_part, legit_part) if a == b)
+            if matches >= len(legit_part) - 2 and domain_part != legit_part:
+                return True
+    return False
+
+def analyze_url(url: str) -> dict:
+    """Analyze URL and return result"""
+    domain = extract_domain(url)
     
-    url_pattern = re.compile(
-        r'^(https?:\/\/)?'
-        r'([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+'
-        r'[a-zA-Z]{2,}'
-        r'(:\d+)?'
-        r'(\/.*)?$'
-    )
-    return url_pattern.match(url) is not None
-
-# ---------- feature extraction (30 features) ----------
-def extract_features_from_url(url: str):
-    try:
-        length = len(url)
-        num_slash = url.count("/")
-        num_dot = url.count(".")
-        has_https = 1 if url.startswith("https") else 0
-        has_at = 1 if "@" in url else 0
-        has_hyphen = 1 if "-" in url else 0
-
-        host = url.split("//")[-1].split("/")[0] if "://" in url else url.split("/")[0]
-        has_ip = 1 if any(ch.isdigit() for ch in host) else 0
-
-        num_question = url.count("?")
-        num_equal = url.count("=")
-        num_amp = url.count("&")
-        num_percent = url.count("%")
-        num_hash = url.count("#")
-
-        num_digits = sum(ch.isdigit() for ch in url)
-        num_letters = sum(ch.isalpha() for ch in url)
-        ratio_digits = num_digits / max(1, length)
-        ratio_letters = num_letters / max(1, length)
-
-        url_depth = url.count("/") - 2 if "://" in url else url.count("/")
-        subdomain_count = max(0, host.count(".") - 1)
-
-        has_suspicious_words = 1 if any(
-            w in url.lower() for w in ["login", "verify", "update", "secure", "bank", "confirm", "signin"]
-        ) else 0
-
-        starts_with_ip = 1 if has_ip else 0
-        ends_with_exe = 1 if url.lower().endswith(".exe") else 0
-        ends_with_zip = 1 if url.lower().endswith(".zip") else 0
-        has_port = 1 if ":" in host else 0
-
-        path = url.split("//")[-1].split("/", 1)[1] if "/" in url.split("//")[-1] else ""
-        path_length = len(path)
-        host_length = len(host)
-
-        num_special = sum(ch in "!*$^(){}[]|\"'<>" for ch in url)
-        ratio_special = num_special / max(1, length)
-
-        has_https_token = 1 if "https" in host.lower() and not url.startswith("https") else 0
-        tld = host.split(".")[-1] if "." in host else ""
-        tld_length = len(tld)
-
-        dummy = 0.0
-
-        features = [
-            length, num_slash, num_dot, has_https, has_at, has_hyphen, has_ip,
-            num_question, num_equal, num_amp, num_percent, num_hash,
-            num_digits, num_letters, ratio_digits, ratio_letters,
-            url_depth, subdomain_count, has_suspicious_words, starts_with_ip,
-            ends_with_exe, ends_with_zip, has_port, path_length,
-            host_length, num_special, ratio_special, has_https_token,
-            tld_length, dummy
-        ]
-
-        X_structured = np.array([features], dtype=float)
-        return X_structured
+    # RULE 1: Exact match with legitimate domain → LEGITIMATE
+    if domain in LEGITIMATE_DOMAINS:
+        return {"is_phishing": False, "reason": "Matched trusted domain"}
     
-    except Exception as e:
-        print(f"Error extracting features: {e}")
-        return np.zeros((1, 30), dtype=float)
+    # RULE 2: Subdomain of legitimate domain (e.g., accounts.google.com) → LEGITIMATE
+    for legit in LEGITIMATE_DOMAINS:
+        if domain.endswith('.' + legit):
+            return {"is_phishing": False, "reason": f"Subdomain of trusted domain ({legit})"}
+    
+    # RULE 3: Typo of legitimate domain → PHISHING
+    if is_legitimate_typo(domain):
+        return {"is_phishing": True, "reason": "Typo of trusted domain"}
+    
+    # RULE 4: Suspicious TLDs → PHISHING
+    for tld in SUSPICIOUS_TLDS:
+        if domain.endswith(tld):
+            return {"is_phishing": True, "reason": f"Suspicious TLD ({tld})"}
+    
+    # RULE 5: IP address instead of domain → PHISHING
+    if re.match(r'^\d+\.\d+\.\d+\.\d+$', domain):
+        return {"is_phishing": True, "reason": "IP address used instead of domain"}
+    
+    # RULE 6: Suspicious keywords in URL → PHISHING
+    url_lower = url.lower()
+    for keyword in SUSPICIOUS_KEYWORDS:
+        if keyword in url_lower and domain not in LEGITIMATE_DOMAINS:
+            # Check if it's NOT a legitimate domain with that word
+            is_fake = True
+            for legit in LEGITIMATE_DOMAINS:
+                if legit in url_lower:
+                    is_fake = False
+                    break
+            if is_fake:
+                return {"is_phishing": True, "reason": f"Suspicious keyword: '{keyword}'"}
+    
+    # RULE 7: Gibberish domain (random characters) → PHISHING
+    domain_without_tld = domain.split('.')[0]
+    if len(domain_without_tld) > 15:
+        return {"is_phishing": True, "reason": "Very long/random domain name"}
+    
+    # Check for random character patterns (low vowel/consonant ratio or vice versa)
+    vowels = sum(1 for c in domain_without_tld if c in 'aeiou')
+    consonants = len(domain_without_tld) - vowels
+    if len(domain_without_tld) > 8:
+        if vowels == 0 or vowels > len(domain_without_tld) * 0.8:
+            return {"is_phishing": True, "reason": "Random/gibberish domain pattern"}
+    
+    # RULE 8: Check for multiple hyphens/underscores (usually phishing)
+    if domain.count('-') > 2 or domain.count('_') > 2:
+        return {"is_phishing": True, "reason": "Too many hyphens/underscores"}
+    
+    # RULE 9: Contains @ symbol in URL (phishing trick)
+    if '@' in url and '://' in url:
+        return {"is_phishing": True, "reason": "Contains @ symbol in URL"}
+    
+    # RULE 10: Very long URL (over 100 chars) with suspicious patterns
+    if len(url) > 100 and ('login' in url or 'verify' in url):
+        return {"is_phishing": True, "reason": "Long URL with suspicious keywords"}
+    
+    # DEFAULT: If nothing else matches, check if it's a known legitimate site
+    # For unknown domains, we'll mark as PHISHING to be safe
+    return {"is_phishing": True, "reason": "Not recognized as legitimate domain"}
 
 
-# ---------- request model ----------
+# ========== API ENDPOINTS ==========
+
 class UrlRequest(BaseModel):
     url: str
-    model_type: str = "ensemble"
+    model_type: str = "rules"
 
-
-# ---------- response model ----------
 class PredictionResponse(BaseModel):
     is_phishing: bool
     confidence: float
     model_used: str
+    reason: str = ""
 
-
-# ---------- main endpoint ----------
 @app.post("/predict", response_model=PredictionResponse)
-async def predict(req: UrlRequest) -> Dict[str, Any]:
-    try:
-        url = req.url.strip()
-        model_name = req.model_type.lower()
-        
-        # ---------- URL VALIDATION ----------
-        if not url or len(url) == 0:
-            return {
-                "is_phishing": False,
-                "confidence": 0.0,
-                "model_used": "invalid"
-            }
-        
-        if not is_valid_url_format(url):
-            return {
-                "is_phishing": False,
-                "confidence": 0.0,
-                "model_used": "invalid"
-            }
-        
-        if not url.startswith(('http://', 'https://')):
-            url = 'http://' + url
-        
-        # ---------- CHECK TRUSTED DOMAIN FIRST ----------
-        is_trusted, trusted_conf = is_trusted_domain(url)
-        if is_trusted:
-            return {
-                "is_phishing": False,
-                "confidence": 0.99,  # 99% safe for trusted domains
-                "model_used": "trusted_domain"
-            }
-        
-        # ---------- FEATURE EXTRACTION ----------
-        X_structured = extract_features_from_url(url)
-        X_cnn = X_structured.reshape(1, 5, 6, 1)
-        
-        # ---------- PREDICTION ----------
-        if model_name == "svm":
-            proba = float(svm_model.predict_proba(X_structured)[0][1])
-            used = "svm"
-        elif model_name == "xgb":
-            proba = float(xgb_model.predict_proba(X_structured)[0][1])
-            used = "xgb"
-        elif model_name == "cnn":
-            proba = float(cnn_model.predict(X_cnn, verbose=0)[0][0])
-            used = "cnn"
-        elif model_name == "rf":
-            proba = float(rf_model.predict_proba(X_structured)[0][1])
-            used = "rf"
-        else:  # ensemble
-            p_rf = float(rf_model.predict_proba(X_structured)[0][1])
-            p_svm = float(svm_model.predict_proba(X_structured)[0][1])
-            p_xgb = float(xgb_model.predict_proba(X_structured)[0][1])
-            p_cnn = float(cnn_model.predict(X_cnn, verbose=0)[0][0])
-            proba = (p_rf + p_svm + p_xgb + p_cnn) / 4.0
-            used = "ensemble"
-        
-        # Convert probability: proba > 0.5 means phishing
-        # For legitimate sites, confidence should be (1 - proba)
-        is_phishing = proba > 0.5
-        
-        # Adjust confidence for legitimate sites
-        if not is_phishing:
-            confidence = 1 - proba  # Convert to safe confidence
-        else:
-            confidence = proba  # Keep as phishing confidence
-        
-        # Boost confidence for very clear cases
-        if not is_phishing and confidence < 0.85:
-            # Check if it's a common legitimate domain pattern
-            if 'https' in url:
-                confidence = min(confidence + 0.10, 0.95)
-        
-        return {
-            "is_phishing": is_phishing,
-            "confidence": round(confidence, 4),
-            "model_used": used
-        }
-        
-    except Exception as e:
-        print(f"Error in predict: {e}")
-        return {
-            "is_phishing": False,
-            "confidence": 0.0,
-            "model_used": "error"
-        }
+async def predict(req: UrlRequest):
+    url = req.url.strip()
+    
+    # Add http:// if no protocol
+    if not url.startswith(('http://', 'https://')):
+        url = 'http://' + url
+    
+    # Analyze URL
+    result = analyze_url(url)
+    
+    if result["is_phishing"]:
+        return PredictionResponse(
+            is_phishing=True,
+            confidence=0.95,
+            model_used="rules_engine",
+            reason=result["reason"]
+        )
+    else:
+        return PredictionResponse(
+            is_phishing=False,
+            confidence=0.99,
+            model_used="rules_engine",
+            reason=result["reason"]
+        )
 
-
-# ---------- health check ----------
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "models": ["rf", "svm", "xgb", "cnn"]}
-
+    return {"status": "healthy", "models": ["rules_engine"], "description": "Rules-based phishing detection"}
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=5000)
