@@ -15,8 +15,8 @@ TRUSTED_DOMAINS = {
     'stackoverflow.com', 'gitlab.com', 'bitbucket.org',
     'microsoft.com', 'apple.com', 'icloud.com',
     
-    # Social Media
-    'facebook.com', 'instagram.com', 'twitter.com', 'linkedin.com',
+        # Social Media
+    'facebook.com', 'instagram.com', 'twitter.com', 'x.com', 'linkedin.com',
     'reddit.com', 'pinterest.com', 'tumblr.com', 'snapchat.com',
     'tiktok.com', 'telegram.org', 'whatsapp.com', 'discord.com',
     
