@@ -18,35 +18,51 @@ cnn_model = tf.keras.models.load_model("models/cnn_model.h5")
 
 print("✅ All models loaded successfully")
 
-# ---------- TRUSTED DOMAINS (Always SAFE, but still use ensemble) ----------
+# ---------- TRUSTED DOMAINS (100% SAFE - Force confidence to 0.99) ----------
 TRUSTED_DOMAINS = [
-    'onrender.com',
-    'render.com',
-    'google.com',
-    'github.com',
-    'stackoverflow.com',
-    'localhost',
-    '127.0.0.1',
-    'microsoft.com',
-    'apple.com',
-    'amazon.com'
+    'google.com', 'youtube.com', 'facebook.com', 'amazon.com',
+    'microsoft.com', 'apple.com', 'github.com', 'stackoverflow.com',
+    'netflix.com', 'twitter.com', 'instagram.com', 'linkedin.com',
+    'reddit.com', 'wikipedia.org', 'spotify.com', 'whatsapp.com',
+    'telegram.org', 'cloudflare.com', 'medium.com', 'quora.com',
+    'yahoo.com', 'bing.com', 'duckduckgo.com', 'paypal.com',
+    'onrender.com', 'render.com', 'localhost', '127.0.0.1'
 ]
 
-def is_trusted_domain(url: str) -> bool:
-    """Check if URL belongs to trusted domain"""
+# ---------- COMMON TYPO PATTERNS (PHISHING) ----------
+TYPO_PATTERNS = [
+    (r'goo+gle', 'google.com'),
+    (r'youtu+be', 'youtube.com'),
+    (r'fac+book', 'facebook.com'),
+    (r'ama+zon', 'amazon.com'),
+    (r'micro+soft', 'microsoft.com'),
+    (r'link+din', 'linkedin.com'),
+    (r'insta+gram', 'instagram.com'),
+    (r'twit+ter', 'twitter.com'),
+]
+
+def is_trusted_domain(url: str) -> tuple:
+    """Check if URL belongs to trusted domain - returns (is_trusted, confidence)"""
     try:
         parsed = urlparse(url)
         domain = parsed.netloc.lower()
         if domain.startswith('www.'):
             domain = domain[4:]
+        
+        # Exact match
         for trusted in TRUSTED_DOMAINS:
             if domain == trusted or domain.endswith('.' + trusted):
-                return True
-        return False
+                return True, 0.99
+        
+        # Check for typos
+        for pattern, correct in TYPO_PATTERNS:
+            if re.search(pattern, domain):
+                return False, 0.95  # Typo - likely phishing
+        
+        return False, None
     except Exception:
-        return False
+        return False, None
 
-# ---------- URL validation functions ----------
 def is_valid_url_format(url: str) -> bool:
     """Check if URL has valid format"""
     if ',' in url or ' ' in url:
@@ -166,28 +182,33 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
         if not url.startswith(('http://', 'https://')):
             url = 'http://' + url
         
+        # ---------- CHECK TRUSTED DOMAIN FIRST ----------
+        is_trusted, trusted_conf = is_trusted_domain(url)
+        if is_trusted:
+            return {
+                "is_phishing": False,
+                "confidence": 0.99,  # 99% safe for trusted domains
+                "model_used": "trusted_domain"
+            }
+        
         # ---------- FEATURE EXTRACTION ----------
         X_structured = extract_features_from_url(url)
         X_cnn = X_structured.reshape(1, 5, 6, 1)
         
-        # ---------- PREDICTION (Always show actual model name) ----------
+        # ---------- PREDICTION ----------
         if model_name == "svm":
             proba = float(svm_model.predict_proba(X_structured)[0][1])
             used = "svm"
-            
         elif model_name == "xgb":
             proba = float(xgb_model.predict_proba(X_structured)[0][1])
             used = "xgb"
-            
         elif model_name == "cnn":
             proba = float(cnn_model.predict(X_cnn, verbose=0)[0][0])
             used = "cnn"
-            
         elif model_name == "rf":
             proba = float(rf_model.predict_proba(X_structured)[0][1])
             used = "rf"
-            
-        else:  # ensemble - uses all 4 models
+        else:  # ensemble
             p_rf = float(rf_model.predict_proba(X_structured)[0][1])
             p_svm = float(svm_model.predict_proba(X_structured)[0][1])
             p_xgb = float(xgb_model.predict_proba(X_structured)[0][1])
@@ -195,22 +216,25 @@ async def predict(req: UrlRequest) -> Dict[str, Any]:
             proba = (p_rf + p_svm + p_xgb + p_cnn) / 4.0
             used = "ensemble"
         
-        # ---------- TRUSTED DOMAIN OVERRIDE (Still shows ensemble as model) ----------
-        # If domain is trusted, force is_phishing = False but keep the model name
-        if is_trusted_domain(url):
-            return {
-                "is_phishing": False,
-                "confidence": round(proba, 4),
-                "model_used": used
-            }
+        # Convert probability: proba > 0.5 means phishing
+        # For legitimate sites, confidence should be (1 - proba)
+        is_phishing = proba > 0.5
         
-        # ---------- RETURN RESULT ----------
-        # Using 0.25 threshold (25% confidence needed for phishing)
-        is_phishing = proba >= 0.25
+        # Adjust confidence for legitimate sites
+        if not is_phishing:
+            confidence = 1 - proba  # Convert to safe confidence
+        else:
+            confidence = proba  # Keep as phishing confidence
+        
+        # Boost confidence for very clear cases
+        if not is_phishing and confidence < 0.85:
+            # Check if it's a common legitimate domain pattern
+            if 'https' in url:
+                confidence = min(confidence + 0.10, 0.95)
         
         return {
             "is_phishing": is_phishing,
-            "confidence": round(proba, 4),
+            "confidence": round(confidence, 4),
             "model_used": used
         }
         
