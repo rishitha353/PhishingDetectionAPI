@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PhishShield - Smart Protection</title>
+<title>PhishLens - Smart Phishing Detection</title>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -36,7 +36,7 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 /* FEATURES */
 .features{display:flex;justify-content:space-around;padding:40px;background:#020617;flex-wrap:wrap}
 .feature{max-width:220px;text-align:center}
-.feature h4{margin:10px 0}
+.feature h4{margin:10px 0;font-size:16px}
 .feature p{font-size:13px;color:#94a3b8}
 
 /* HOW */
@@ -86,21 +86,19 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 <body>
 
 <div class="navbar">
-<div class="logo">🛡️ PhishShield</div>
+<div class="logo">🔍 PhishLens</div>
 <div class="nav-links">
 <a href="#">Home</a>
-<a href="#">Check URL</a>
 <a href="#">Features</a>
-<a href="#">API</a>
-<button class="btn btn-history" onclick="openHistory()">📜 History</button>
+<button class="btn btn-history" onclick="openHistory()">History</button>
 </div>
 </div>
 
 <div class="hero">
 <div class="hero-left">
-<div class="badge">🔒 Smart Protection</div>
+<div class="badge">Smart Protection</div>
 <h1>Detect Phishing.<br>Stay Safe Online.</h1>
-<p>AI-powered phishing detection with real-time threat intelligence.</p>
+<p>Real-time phishing detection with intelligent threat analysis.</p>
 
 <div class="input-box">
 <input type="text" id="urlInput" placeholder="Enter a URL to check...">
@@ -110,17 +108,29 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 <button class="quick-btn" onclick="setUrl('google.com')">Safe: google.com</button>
 <button class="quick-btn" onclick="setUrl('paypal.com.login.xyz')">Phishing: paypal.com.login.xyz</button>
 </div>
-<div id="loading" style="display:none; margin-top:15px;">⏳ Analyzing URL... Please wait up to 60 seconds for first request.</div>
+<div id="loading" style="display:none; margin-top:15px;">Analyzing URL... Please wait up to 60 seconds for first request.</div>
 <div id="resultCard" class="result-card"></div>
 </div>
-<div class="hero-right">🛡️</div>
+<div class="hero-right">🔍</div>
 </div>
 
 <div class="features">
-<div class="feature"><h4>🎯 Accurate Detection</h4><p>Advanced AI detects phishing attempts</p></div>
-<div class="feature"><h4>⚡ Real-time</h4><p>Instant protection from threats</p></div>
-<div class="feature"><h4>🔒 Privacy</h4><p>Your data is never stored</p></div>
-<div class="feature"><h4>🧩 Integration</h4><p>API & extension support</p></div>
+<div class="feature">
+<h4>Rule-Based Detection</h4>
+<p>Detects phishing URLs using intelligent rules and pattern matching</p>
+</div>
+<div class="feature">
+<h4>Suspicious Analysis</h4>
+<p>Checks suspicious keywords, domains, and TLD patterns</p>
+</div>
+<div class="feature">
+<h4>Brand Protection</h4>
+<p>Identifies fake brand links and impersonation attempts</p>
+</div>
+<div class="feature">
+<h4>Fast & Easy</h4>
+<p>Instant results with simple, intuitive interface</p>
+</div>
 </div>
 
 <div class="how">
@@ -135,7 +145,7 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 <!-- History Modal -->
 <div id="historyModal" class="modal">
 <div class="modal-content">
-<h2>📜 URL Check History</h2>
+<h2>URL Check History</h2>
 <div id="historyList" class="history-list">
 <div class="empty-history">No history yet. Check some URLs!</div>
 </div>
@@ -174,11 +184,11 @@ function openHistory() {
     } else {
         historyList.innerHTML = history.map(entry => `
             <li>
-                <div class="history-url">🔗 ${escapeHtml(entry.url)}</div>
+                <div class="history-url">${escapeHtml(entry.url)}</div>
                 <div class="history-result">
                     Result: <span class="${entry.isPhishing ? 'history-phishing' : 'history-safe'}">${entry.result}</span>
                 </div>
-                <div class="history-time">📅 ${entry.timestamp}</div>
+                <div class="history-time">${entry.timestamp}</div>
             </li>
         `).join('');
     }
@@ -247,11 +257,10 @@ async function checkURL() {
         
         resultCard.style.display = 'block';
         
-        // Check for invalid URL format
         if (modelUsed === 'invalid_format' || modelUsed === 'invalid' || modelUsed === 'error') {
             resultCard.className = 'result-card invalid';
             resultCard.innerHTML = `
-                <div class="result-status">❌ INVALID URL</div>
+                <div class="result-status">INVALID URL</div>
                 <div>${reason || 'Please enter a valid URL (e.g., google.com)'}</div>
             `;
             addToHistory(url, 'INVALID URL', false);
@@ -259,20 +268,20 @@ async function checkURL() {
         else if (isPhishing) {
             resultCard.className = 'result-card phishing';
             resultCard.innerHTML = `
-                <div class="result-status">⚠️ PHISHING WEBSITE</div>
+                <div class="result-status">PHISHING WEBSITE</div>
                 <div>${reason || 'This website appears to be fraudulent'}</div>
-                <div class="result-confidence">Detected by: ${modelUsed}</div>
+                <div class="result-confidence">Detection: ${modelUsed}</div>
             `;
-            addToHistory(url, '⚠️ PHISHING WEBSITE', true);
+            addToHistory(url, 'PHISHING WEBSITE', true);
         } 
         else {
             resultCard.className = 'result-card safe';
             resultCard.innerHTML = `
-                <div class="result-status">✅ LEGITIMATE WEBSITE</div>
+                <div class="result-status">LEGITIMATE WEBSITE</div>
                 <div>${reason || 'This is a trusted website'}</div>
-                <div class="result-confidence">Verified by PhishShield</div>
+                <div class="result-confidence">Verified by PhishLens</div>
             `;
-            addToHistory(url, '✅ LEGITIMATE WEBSITE', false);
+            addToHistory(url, 'LEGITIMATE WEBSITE', false);
         }
     } catch (error) {
         clearTimeout(timeoutId);
@@ -281,18 +290,18 @@ async function checkURL() {
         
         if (error.name === 'AbortError') {
             resultCard.innerHTML = `
-                <div class="result-status">⏳ REQUEST TIMEOUT</div>
+                <div class="result-status">REQUEST TIMEOUT</div>
                 <div>The service is waking up. Please wait 30 seconds and try again.</div>
-                <div class="result-confidence">Note: First request after inactivity takes 30-60 seconds.</div>
+                <div class="result-confidence">First request after inactivity takes 30-60 seconds.</div>
             `;
-            addToHistory(url, 'REQUEST TIMEOUT - Service waking up', false);
+            addToHistory(url, 'REQUEST TIMEOUT', false);
         } else {
             resultCard.innerHTML = `
-                <div class="result-status">🔄 SERVICE STARTING</div>
+                <div class="result-status">SERVICE STARTING</div>
                 <div>Please wait 30 seconds and click "Check URL" again.</div>
                 <div class="result-confidence">The server is waking up from sleep mode.</div>
             `;
-            addToHistory(url, 'SERVICE STARTING - Please retry', false);
+            addToHistory(url, 'SERVICE STARTING', false);
         }
     } finally {
         clearTimeout(timeoutId);
