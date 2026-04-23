@@ -162,8 +162,7 @@ function addToHistory(url, result, isPhishing, confidence) {
         confidence: confidence,
         timestamp: new Date().toLocaleString()
     };
-    history.unshift(entry); // Add to beginning
-    // Keep only last 50 entries
+    history.unshift(entry);
     if (history.length > 50) history = history.slice(0, 50);
     saveHistory();
 }
@@ -197,7 +196,7 @@ function clearHistory() {
     if (confirm('Are you sure you want to clear all history?')) {
         history = [];
         saveHistory();
-        openHistory(); // Refresh view
+        openHistory();
     }
 }
 
@@ -245,8 +244,9 @@ async function checkURL() {
         
         const data = await response.json();
         const isPhishing = data.is_phishing === true;
+        // Confidence from API is already the percentage (0.99 = 99% safe for legitimate sites)
         const confidence = typeof data.confidence === 'number' ? data.confidence : 0;
-        const riskPercent = (confidence * 100).toFixed(1);
+        const confidencePercent = (confidence * 100).toFixed(1);
         const modelUsed = data.model_used || 'ensemble';
         
         resultCard.style.display = 'block';
@@ -262,19 +262,18 @@ async function checkURL() {
             resultCard.className = 'result-card phishing';
             resultCard.innerHTML = `
                 <div class="result-status">⚠️ PHISHING DETECTED</div>
-                <div>Risk Score: ${riskPercent}%</div>
+                <div>Risk Score: ${confidencePercent}%</div>
                 <div class="result-confidence">Detected by: ${modelUsed}</div>
             `;
-            addToHistory(url, `⚠️ PHISHING DETECTED (${riskPercent}% risk)`, true, riskPercent);
+            addToHistory(url, `⚠️ PHISHING DETECTED (${confidencePercent}% risk)`, true, confidencePercent);
         } else {
-            const safePercent = ((1 - confidence) * 100).toFixed(1);
             resultCard.className = 'result-card safe';
             resultCard.innerHTML = `
                 <div class="result-status">✅ LEGITIMATE WEBSITE</div>
-                <div>Confidence: ${safePercent}% safe</div>
+                <div>Confidence: ${confidencePercent}% safe</div>
                 <div class="result-confidence">Analyzed by: ${modelUsed}</div>
             `;
-            addToHistory(url, `✅ LEGITIMATE (${safePercent}% safe)`, false, safePercent);
+            addToHistory(url, `✅ LEGITIMATE (${confidencePercent}% safe)`, false, confidencePercent);
         }
     } catch (error) {
         clearTimeout(timeoutId);
@@ -307,7 +306,6 @@ document.getElementById('urlInput').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') checkURL();
 });
 
-// Close modal when clicking outside
 window.onclick = function(event) {
     const modal = document.getElementById('historyModal');
     if (event.target === modal) {
