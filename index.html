@@ -154,12 +154,11 @@ function saveHistory() {
     localStorage.setItem('phishguard_history', JSON.stringify(history));
 }
 
-function addToHistory(url, result, isPhishing, confidence) {
+function addToHistory(url, result, isPhishing) {
     const entry = {
         url: url,
         result: result,
         isPhishing: isPhishing,
-        confidence: confidence,
         timestamp: new Date().toLocaleString()
     };
     history.unshift(entry);
@@ -178,7 +177,6 @@ function openHistory() {
                 <div class="history-url">🔗 ${escapeHtml(entry.url)}</div>
                 <div class="history-result">
                     Result: <span class="${entry.isPhishing ? 'history-phishing' : 'history-safe'}">${entry.result}</span>
-                    ${entry.confidence ? ` (${entry.confidence}% confidence)` : ''}
                 </div>
                 <div class="history-time">📅 ${entry.timestamp}</div>
             </li>
@@ -244,9 +242,6 @@ async function checkURL() {
         
         const data = await response.json();
         const isPhishing = data.is_phishing === true;
-        // Confidence from API is already the percentage (0.99 = 99% safe for legitimate sites)
-        const confidence = typeof data.confidence === 'number' ? data.confidence : 0;
-        const confidencePercent = (confidence * 100).toFixed(1);
         const modelUsed = data.model_used || 'ensemble';
         
         resultCard.style.display = 'block';
@@ -257,23 +252,23 @@ async function checkURL() {
                 <div class="result-status">❌ INVALID URL</div>
                 <div>Please enter a valid URL format (e.g., https://example.com)</div>
             `;
-            addToHistory(url, 'INVALID URL', false, null);
+            addToHistory(url, 'INVALID URL', false);
         } else if (isPhishing) {
             resultCard.className = 'result-card phishing';
             resultCard.innerHTML = `
-                <div class="result-status">⚠️ PHISHING DETECTED</div>
-                <div>Risk Score: ${confidencePercent}%</div>
+                <div class="result-status">⚠️ PHISHING WEBSITE</div>
+                <div>This website appears to be fraudulent</div>
                 <div class="result-confidence">Detected by: ${modelUsed}</div>
             `;
-            addToHistory(url, `⚠️ PHISHING DETECTED (${confidencePercent}% risk)`, true, confidencePercent);
+            addToHistory(url, '⚠️ PHISHING WEBSITE', true);
         } else {
             resultCard.className = 'result-card safe';
             resultCard.innerHTML = `
                 <div class="result-status">✅ LEGITIMATE WEBSITE</div>
-                <div>Confidence: ${confidencePercent}% safe</div>
-                <div class="result-confidence">Analyzed by: ${modelUsed}</div>
+                <div>This is a trusted website</div>
+                <div class="result-confidence">Verified by PhishShield</div>
             `;
-            addToHistory(url, `✅ LEGITIMATE (${confidencePercent}% safe)`, false, confidencePercent);
+            addToHistory(url, '✅ LEGITIMATE WEBSITE', false);
         }
     } catch (error) {
         clearTimeout(timeoutId);
@@ -286,14 +281,14 @@ async function checkURL() {
                 <div>The service is waking up. Please wait 30 seconds and try again.</div>
                 <div class="result-confidence">Note: First request after inactivity takes 30-60 seconds.</div>
             `;
-            addToHistory(url, 'REQUEST TIMEOUT - Service waking up', false, null);
+            addToHistory(url, 'REQUEST TIMEOUT - Service waking up', false);
         } else {
             resultCard.innerHTML = `
                 <div class="result-status">🔄 SERVICE STARTING</div>
                 <div>Please wait 30 seconds and click "Check URL" again.</div>
                 <div class="result-confidence">The server is waking up from sleep mode.</div>
             `;
-            addToHistory(url, 'SERVICE STARTING - Please retry', false, null);
+            addToHistory(url, 'SERVICE STARTING - Please retry', false);
         }
     } finally {
         clearTimeout(timeoutId);
