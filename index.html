@@ -11,9 +11,10 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 
 /* NAV */
 .navbar{display:flex;justify-content:space-between;align-items:center;padding:18px 40px;background:#0b1220;border-bottom:1px solid rgba(255,255,255,0.05)}
-.logo{font-size:22px;font-weight:700;color:#6ea8ff}
+.logo{font-size:22px;font-weight:700;color:#6ea8ff;cursor:pointer}
 .nav-links{display:flex;gap:25px;align-items:center}
 .nav-links a{color:#cbd5e1;text-decoration:none;font-size:14px;cursor:pointer}
+.nav-links a:hover{color:#6ea8ff}
 .btn{padding:8px 18px;border-radius:8px;border:none;cursor:pointer}
 .btn-outline{border:1px solid #6ea8ff;background:transparent;color:#6ea8ff}
 .btn-primary{background:#3b82f6;color:white}
@@ -31,19 +32,22 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 .input-box button{background:#3b82f6;color:white;border:none;padding:0 25px;cursor:pointer;font-weight:600}
 .input-box button:disabled{opacity:0.6;cursor:not-allowed}
 
-.hero-right{font-size:120px;opacity:0.8}
+/* FEATURES PAGE */
+.features-page{display:none;padding:60px;background:#020617;min-height:calc(100vh - 70px)}
+.features-page h1{font-size:36px;margin-bottom:20px;color:#6ea8ff;text-align:center}
+.features-page > p{text-align:center;color:#94a3b8;margin-bottom:50px}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(350px,1fr));gap:30px;max-width:1200px;margin:0 auto}
+.feature-card{background:#0f172a;padding:30px;border-radius:16px;border-left:4px solid #3b82f6}
+.feature-card h3{color:#6ea8ff;margin-bottom:15px;font-size:20px}
+.feature-card p{color:#94a3b8;margin-bottom:15px;line-height:1.5}
+.feature-card ul{list-style:none;padding-left:0}
+.feature-card ul li{color:#cbd5e1;margin:10px 0;padding-left:20px;position:relative}
+.feature-card ul li:before{content:"•";color:#3b82f6;font-size:18px;position:absolute;left:0}
+.back-btn{background:#1e293b;border:1px solid #334155;padding:10px 24px;border-radius:8px;cursor:pointer;color:#cbd5e1;margin:20px auto;display:inline-block}
+.back-btn:hover{background:#334155}
 
-/* FEATURES */
-.features{display:flex;justify-content:space-around;padding:40px;background:#020617;flex-wrap:wrap}
-.feature{max-width:220px;text-align:center}
-.feature h4{margin:10px 0;font-size:16px;color:#6ea8ff}
-.feature p{font-size:13px;color:#94a3b8;line-height:1.4}
-
-/* HOW */
-.how{padding:60px;text-align:center;background:#020617}
-.steps{display:flex;justify-content:center;gap:40px;margin-top:30px;flex-wrap:wrap}
-.step{max-width:200px}
-.step-num{width:40px;height:40px;background:#3b82f6;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:auto;margin-bottom:10px;font-weight:bold}
+/* HOME PAGE */
+.home-page{display:block}
 
 /* Result Card */
 .result-card{margin-top:20px;padding:20px;border-radius:12px;display:none}
@@ -76,9 +80,8 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 
 @media(max-width:900px){
 .hero{flex-direction:column;text-align:center;padding:40px 20px}
-.hero-right{margin-top:30px}
-.features{flex-direction:column;gap:30px;align-items:center}
-.steps{flex-direction:column;align-items:center}
+.features-grid{grid-template-columns:1fr}
+.features-page{padding:30px}
 }
 </style>
 </head>
@@ -86,14 +89,16 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 <body>
 
 <div class="navbar">
-<div class="logo">PhishLens</div>
+<div class="logo" onclick="showHome()">PhishLens</div>
 <div class="nav-links">
-<a href="#">Home</a>
-<a href="#">Features</a>
+<a onclick="showHome()">Home</a>
+<a onclick="showFeatures()">Features</a>
 <button class="btn btn-history" onclick="openHistory()">History</button>
 </div>
 </div>
 
+<!-- HOME PAGE -->
+<div id="homePage" class="home-page">
 <div class="hero">
 <div class="hero-left">
 <div class="badge">Smart Protection</div>
@@ -113,32 +118,79 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 </div>
 <div class="hero-right"></div>
 </div>
-
-<div class="features">
-<div class="feature">
-<h4>Rule-Based Detection</h4>
-<p>Detects phishing URLs using intelligent rules and pattern matching</p>
-</div>
-<div class="feature">
-<h4>Suspicious Analysis</h4>
-<p>Checks suspicious keywords, domains, and TLD patterns</p>
-</div>
-<div class="feature">
-<h4>Brand Protection</h4>
-<p>Identifies fake brand links and impersonation attempts</p>
-</div>
-<div class="feature">
-<h4>Fast & Easy</h4>
-<p>Instant results with simple, intuitive interface</p>
-</div>
 </div>
 
-<div class="how">
-<h2>Simple. Fast. Effective.</h2>
-<div class="steps">
-<div class="step"><div class="step-num">1</div><p>Enter URL</p></div>
-<div class="step"><div class="step-num">2</div><p>Analyze</p></div>
-<div class="step"><div class="step-num">3</div><p>Get Result</p></div>
+<!-- FEATURES PAGE -->
+<div id="featuresPage" class="features-page" style="display:none">
+<div style="text-align:center">
+<button class="back-btn" onclick="showHome()">← Back to Home</button>
+</div>
+<h1>Features</h1>
+<p>How PhishLens protects you from phishing attacks</p>
+
+<div class="features-grid">
+<div class="feature-card">
+<h3>Smart Detection</h3>
+<p>Detects phishing using multiple techniques:</p>
+<ul>
+<li>Domain analysis</li>
+<li>Keyword detection</li>
+<li>Brand impersonation detection</li>
+<li>Pattern matching</li>
+</ul>
+</div>
+
+<div class="feature-card">
+<h3>Real-Time Analysis</h3>
+<p>Instant results in milliseconds. The system analyzes URLs immediately and provides feedback within seconds.</p>
+<ul>
+<li>Sub-second response time</li>
+<li>No waiting or queuing</li>
+<li>Immediate threat assessment</li>
+</ul>
+</div>
+
+<div class="feature-card">
+<h3>Multi-Layer Security</h3>
+<p>Multiple security layers to catch phishing attempts:</p>
+<ul>
+<li>Suspicious TLD check (.xyz, .top, .online, etc.)</li>
+<li>Suspicious keyword detection (login, verify, secure, etc.)</li>
+<li>URL format validation</li>
+<li>Domain structure analysis</li>
+</ul>
+</div>
+
+<div class="feature-card">
+<h3>Easy to Use</h3>
+<p>Simple, intuitive interface for everyone:</p>
+<ul>
+<li>Just paste a URL → get instant result</li>
+<li>Clear visual indicators (Legitimate / Phishing)</li>
+<li>History tracking of all checked URLs</li>
+<li>No registration required</li>
+</ul>
+</div>
+
+<div class="feature-card">
+<h3>Brand Protection</h3>
+<p>Identifies fake websites impersonating trusted brands like Google, PayPal, Amazon, and more.</p>
+<ul>
+<li>Detects brand name misuse</li>
+<li>Catches typosquatting attempts</li>
+<li>Prevents credential theft</li>
+</ul>
+</div>
+
+<div class="feature-card">
+<h3>Privacy Focused</h3>
+<p>Your data is never stored on our servers. History is saved only on your device.</p>
+<ul>
+<li>No personal information collected</li>
+<li>No tracking or analytics</li>
+<li>History stored locally in your browser</li>
+</ul>
+</div>
 </div>
 </div>
 
@@ -156,6 +208,17 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 
 <script>
 const API_URL = 'https://phishing-java-api.onrender.com/api/phishing/predict';
+
+// Page navigation
+function showHome() {
+    document.getElementById('homePage').style.display = 'block';
+    document.getElementById('featuresPage').style.display = 'none';
+}
+
+function showFeatures() {
+    document.getElementById('homePage').style.display = 'none';
+    document.getElementById('featuresPage').style.display = 'block';
+}
 
 // Load history from localStorage
 let history = JSON.parse(localStorage.getItem('phishguard_history') || '[]');
