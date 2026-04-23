@@ -16,8 +16,8 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 .btn-history:hover{background:#3b82f6;color:white}
 
 /* HERO */
-.hero{display:flex;justify-content:space-between;align-items:center;padding:80px 60px;background:radial-gradient(circle at right,#1e3a8a,#020617)}
-.hero-left{max-width:600px}
+.hero{display:flex;justify-content:center;align-items:center;padding:80px 60px;background:radial-gradient(circle at right,#1e3a8a,#020617);min-height:calc(100vh - 70px)}
+.hero-left{max-width:600px;text-align:center}
 .badge{display:inline-block;background:rgba(59,130,246,0.2);padding:6px 12px;border-radius:20px;font-size:12px;margin-bottom:15px;color:#3b82f6}
 .hero h1{font-size:48px;line-height:1.2;margin-bottom:20px}
 .hero p{color:#cbd5e1;margin-bottom:25px}
@@ -26,8 +26,6 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 .input-box input{flex:1;padding:16px;border:none;outline:none;font-size:16px}
 .input-box button{background:#3b82f6;color:white;border:none;padding:0 25px;cursor:pointer;font-weight:600}
 .input-box button:disabled{opacity:0.6;cursor:not-allowed}
-
-.hero-right{font-size:80px;opacity:0.6}
 
 /* Result Card */
 .result-card{margin-top:20px;padding:20px;border-radius:12px;display:none}
@@ -54,28 +52,12 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 .empty-history{text-align:center;color:#94a3b8;padding:40px}
 
 /* Quick Buttons */
-.quick-buttons{display:flex;gap:10px;margin-top:15px;flex-wrap:wrap}
+.quick-buttons{display:flex;gap:10px;margin-top:15px;flex-wrap:wrap;justify-content:center}
 .quick-btn{background:#1e293b;border:1px solid #334155;padding:8px 16px;border-radius:20px;font-size:12px;cursor:pointer;color:#cbd5e1}
 .quick-btn:hover{background:#334155}
 
-/* Features Section - Simple boxes */
-.features{display:flex;justify-content:space-around;padding:40px 60px;background:#020617;flex-wrap:wrap}
-.feature{max-width:220px;text-align:center}
-.feature h4{margin:10px 0;color:#3b82f6}
-.feature p{font-size:13px;color:#94a3b8}
-
-/* How Section */
-.how{padding:60px;text-align:center;background:#020617}
-.how h2{margin-bottom:30px}
-.steps{display:flex;justify-content:center;gap:40px;margin-top:30px;flex-wrap:wrap}
-.step{max-width:200px}
-.step-num{width:40px;height:40px;background:#3b82f6;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:auto;margin-bottom:10px;font-weight:bold}
-.step p{color:#94a3b8}
-
 @media(max-width:900px){
-.hero{flex-direction:column;text-align:center;padding:40px 20px}
-.features{flex-direction:column;gap:30px;align-items:center}
-.steps{flex-direction:column;align-items:center}
+.hero{padding:40px 20px}
 }
 </style>
 </head>
@@ -103,35 +85,6 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 </div>
 <div id="loading" style="display:none; margin-top:15px;">Analyzing URL... Please wait up to 60 seconds for first request.</div>
 <div id="resultCard" class="result-card"></div>
-</div>
-<div class="hero-right">🔍</div>
-</div>
-
-<div class="features">
-<div class="feature">
-<h4>Accurate Detection</h4>
-<p>Advanced AI detects phishing attempts</p>
-</div>
-<div class="feature">
-<h4>Real-time</h4>
-<p>Instant protection from threats</p>
-</div>
-<div class="feature">
-<h4>Privacy</h4>
-<p>Your data is never stored</p>
-</div>
-<div class="feature">
-<h4>Integration</h4>
-<p>API & extension support</p>
-</div>
-</div>
-
-<div class="how">
-<h2>Simple. Fast. Effective.</h2>
-<div class="steps">
-<div class="step"><div class="step-num">1</div><p>Enter URL</p></div>
-<div class="step"><div class="step-num">2</div><p>Analyze</p></div>
-<div class="step"><div class="step-num">3</div><p>Get Result</p></div>
 </div>
 </div>
 
