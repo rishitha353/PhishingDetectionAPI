@@ -30,7 +30,7 @@ TRUSTED_DOMAINS = {
     'hbomax.com', 'primevideo.com', 'twitch.tv',
     
     # Cloud & Development
-    'cloudflare.com', 'render.com', 'vercel.com', 'heroku.com',
+    'cloudflare.com', 'render.com', 'onrender.com', 'vercel.com', 'heroku.com',
     'netlify.com', 'digitalocean.com', 'aws.amazon.com',
     'azure.microsoft.com', 'cloud.google.com',
     
