@@ -107,8 +107,8 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 <button id="checkBtn" onclick="checkURL()">Check URL</button>
 </div>
 <div class="quick-buttons">
-<button class="quick-btn" onclick="setUrl('https://google.com')">Safe: google.com</button>
-<button class="quick-btn" onclick="setUrl('http://paypal.com.login.xyz')">Phishing: paypal.com.login.xyz</button>
+<button class="quick-btn" onclick="setUrl('google.com')">Safe: google.com</button>
+<button class="quick-btn" onclick="setUrl('paypal.com.login.xyz')">Phishing: paypal.com.login.xyz</button>
 </div>
 <div id="loading" style="display:none; margin-top:15px;">⏳ Analyzing URL... Please wait up to 60 seconds for first request.</div>
 <div id="resultCard" class="result-card"></div>
@@ -230,7 +230,7 @@ async function checkURL() {
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url: url, modelType: 'ensemble' }),
+            body: JSON.stringify({ url: url }),
             signal: controller.signal
         });
         
@@ -243,29 +243,33 @@ async function checkURL() {
         const data = await response.json();
         const isPhishing = data.is_phishing === true;
         const modelUsed = data.model_used || 'ensemble';
+        const reason = data.reason || '';
         
         resultCard.style.display = 'block';
         
-        if (modelUsed === 'invalid') {
+        // Check for invalid URL format
+        if (modelUsed === 'invalid_format' || modelUsed === 'invalid' || modelUsed === 'error') {
             resultCard.className = 'result-card invalid';
             resultCard.innerHTML = `
                 <div class="result-status">❌ INVALID URL</div>
-                <div>Please enter a valid URL format (e.g., https://example.com)</div>
+                <div>${reason || 'Please enter a valid URL (e.g., google.com)'}</div>
             `;
             addToHistory(url, 'INVALID URL', false);
-        } else if (isPhishing) {
+        } 
+        else if (isPhishing) {
             resultCard.className = 'result-card phishing';
             resultCard.innerHTML = `
                 <div class="result-status">⚠️ PHISHING WEBSITE</div>
-                <div>This website appears to be fraudulent</div>
+                <div>${reason || 'This website appears to be fraudulent'}</div>
                 <div class="result-confidence">Detected by: ${modelUsed}</div>
             `;
             addToHistory(url, '⚠️ PHISHING WEBSITE', true);
-        } else {
+        } 
+        else {
             resultCard.className = 'result-card safe';
             resultCard.innerHTML = `
                 <div class="result-status">✅ LEGITIMATE WEBSITE</div>
-                <div>This is a trusted website</div>
+                <div>${reason || 'This is a trusted website'}</div>
                 <div class="result-confidence">Verified by PhishShield</div>
             `;
             addToHistory(url, '✅ LEGITIMATE WEBSITE', false);
