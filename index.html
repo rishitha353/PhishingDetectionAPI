@@ -17,7 +17,7 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 .nav-links a:hover{color:#3b82f6}
 .btn-history{background:#1e293b;border:1px solid #3b82f6;color:#3b82f6;padding:8px 18px;border-radius:8px;cursor:pointer}
 
-/* HERO */
+/* HERO - HOME PAGE */
 .hero{display:flex;justify-content:space-between;align-items:center;padding:80px 60px;background:radial-gradient(circle at right,#1e3a8a,#020617)}
 .hero-left{max-width:600px}
 .badge{display:inline-block;background:rgba(59,130,246,0.2);padding:6px 12px;border-radius:20px;font-size:12px;margin-bottom:15px;color:#3b82f6}
@@ -31,18 +31,25 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 
 .hero-right{font-size:80px;opacity:0.6}
 
-/* FEATURES */
-.features{display:flex;justify-content:space-around;padding:40px 60px;background:#020617;flex-wrap:wrap}
-.feature{max-width:220px;text-align:center}
-.feature h4{margin:10px 0;color:#3b82f6}
-.feature p{font-size:13px;color:#94a3b8}
-
-/* HOW */
-.how{padding:60px;text-align:center;background:#020617}
-.how h2{margin-bottom:30px}
-.steps{display:flex;justify-content:center;gap:40px;margin-top:30px;flex-wrap:wrap}
+/* FEATURES PAGE */
+.features-page{display:none;padding:60px;background:#020617;min-height:calc(100vh - 70px)}
+.features-page h1{font-size:36px;margin-bottom:20px;color:#3b82f6;text-align:center}
+.features-page > p{text-align:center;color:#94a3b8;margin-bottom:50px}
+.features-grid{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;max-width:1000px;margin:0 auto}
+.feature-card{background:#0f172a;padding:30px;border-radius:16px;text-align:center;width:220px}
+.feature-card h3{color:#3b82f6;margin-bottom:15px;font-size:18px}
+.feature-card p{color:#94a3b8;font-size:14px;line-height:1.5}
+.how-section{text-align:center;margin-top:60px}
+.how-section h2{color:#fff;margin-bottom:30px}
+.steps{display:flex;justify-content:center;gap:40px;flex-wrap:wrap}
 .step{max-width:200px}
 .step-num{width:40px;height:40px;background:#3b82f6;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:auto;margin-bottom:10px;font-weight:bold}
+.step p{color:#94a3b8}
+.back-btn{background:#1e293b;border:1px solid #334155;padding:10px 24px;border-radius:8px;cursor:pointer;color:#cbd5e1;margin:20px auto;display:inline-block}
+.back-btn:hover{background:#334155}
+
+/* HOME PAGE */
+.home-page{display:block}
 
 /* Result Card */
 .result-card{margin-top:20px;padding:20px;border-radius:12px;display:none}
@@ -74,8 +81,9 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 
 @media(max-width:900px){
 .hero{flex-direction:column;text-align:center;padding:40px 20px}
-.features{flex-direction:column;gap:30px;align-items:center}
+.features-grid{flex-direction:column;align-items:center}
 .steps{flex-direction:column;align-items:center}
+.features-page{padding:30px}
 }
 </style>
 </head>
@@ -83,14 +91,16 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 <body>
 
 <div class="navbar">
-<div class="logo">PhishLens</div>
+<div class="logo" onclick="showHome()">PhishLens</div>
 <div class="nav-links">
-<a href="#">Home</a>
-<a href="#">Features</a>
+<a onclick="showHome()">Home</a>
+<a onclick="showFeatures()">Features</a>
 <button class="btn-history" onclick="openHistory()">History</button>
 </div>
 </div>
 
+<!-- ========== HOME PAGE ========== -->
+<div id="homePage" class="home-page">
 <div class="hero">
 <div class="hero-left">
 <div class="badge">Smart Protection</div>
@@ -110,32 +120,40 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 </div>
 <div class="hero-right">🔍</div>
 </div>
+</div>
 
-<div class="features">
-<div class="feature">
-<h4>Accurate Detection</h4>
+<!-- ========== FEATURES PAGE ========== -->
+<div id="featuresPage" class="features-page" style="display:none">
+<div style="text-align:center">
+<button class="back-btn" onclick="showHome()">← Back to Home</button>
+</div>
+
+<div class="features-grid">
+<div class="feature-card">
+<h3>Accurate Detection</h3>
 <p>Advanced AI detects phishing attempts</p>
 </div>
-<div class="feature">
-<h4>Real-time</h4>
+<div class="feature-card">
+<h3>Real-time</h3>
 <p>Instant protection from threats</p>
 </div>
-<div class="feature">
-<h4>Privacy</h4>
+<div class="feature-card">
+<h3>Privacy</h3>
 <p>Your data is never stored</p>
 </div>
-<div class="feature">
-<h4>Integration</h4>
+<div class="feature-card">
+<h3>Integration</h3>
 <p>API & extension support</p>
 </div>
 </div>
 
-<div class="how">
+<div class="how-section">
 <h2>Simple. Fast. Effective.</h2>
 <div class="steps">
 <div class="step"><div class="step-num">1</div><p>Enter URL</p></div>
 <div class="step"><div class="step-num">2</div><p>Analyze</p></div>
 <div class="step"><div class="step-num">3</div><p>Get Result</p></div>
+</div>
 </div>
 </div>
 
@@ -153,6 +171,17 @@ body{font-family:'Segoe UI', sans-serif;background:#0b1220;color:#fff}
 
 <script>
 const API_URL = 'https://phishing-java-api.onrender.com/api/phishing/predict';
+
+// Page navigation
+function showHome() {
+    document.getElementById('homePage').style.display = 'block';
+    document.getElementById('featuresPage').style.display = 'none';
+}
+
+function showFeatures() {
+    document.getElementById('homePage').style.display = 'none';
+    document.getElementById('featuresPage').style.display = 'block';
+}
 
 // Load history from localStorage
 let history = JSON.parse(localStorage.getItem('phishguard_history') || '[]');
